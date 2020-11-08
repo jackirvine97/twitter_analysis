@@ -1,4 +1,4 @@
-"""This searches for a specified term in a tweet."""
+"""This searches for a specified term."""
 import tweepy
 
 # Authenticate to Twitter
@@ -11,6 +11,7 @@ api = tweepy.API(auth)
 # Scrape twitter. Note a free twitter developer account only supports up to
 # 100 tweets per request. If a premium account is created the `search_full_archive`
 # method can be used.
+# See: https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/overview
 search_term = "golf"
 tweets = []
 for tweet in api.search(q=search_term, lang="en", rpp=10, count=100):
