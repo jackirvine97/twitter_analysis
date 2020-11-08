@@ -3,4 +3,4 @@ Playground for interacting with the Twitter API.
 
 ## Useful Guides
 
-Introduction: https://realpython.com/twitter-bot-python-tweepy/
+Introduction and cloud bot deploy: https://realpython.com/twitter-bot-python-tweepy/
