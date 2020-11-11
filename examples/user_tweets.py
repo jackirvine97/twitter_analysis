@@ -1,7 +1,7 @@
 import tweepy
 
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
+auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
+auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
 userID = "realDonaldTrump"
@@ -12,3 +12,9 @@ tweets = api.user_timeline(
     include_rts=False,
     tweet_mode="extended"
 )
+
+for info in tweets:
+    print("ID: {}".format(info.id))
+    print(info.created_at)
+    print(info.full_text)
+    print("\n")
