@@ -1,3 +1,5 @@
+"""This plot runs a sentiment analysis on two inputs and plots results,
+detailing polarity and subjectivity."""
 import matplotlib.pyplot as plt
 from textblob import TextBlob
 import tweepy
@@ -26,6 +28,7 @@ pret_subjectivity = [TextBlob(tweet.text).sentiment.subjectivity for tweet in pr
 greggs_polarity = [TextBlob(tweet.text).sentiment.polarity for tweet in greggs_tweets]
 greggs_subjectivity = [TextBlob(tweet.text).sentiment.subjectivity for tweet in greggs_tweets]
 
+# TODO: determine better way to visualise results.
 plt.scatter(pret_polarity, pret_polarity, label="Pret")
 plt.scatter(greggs_polarity, greggs_subjectivity, label="Greggs")
 plt.xlabel("Polarity")
