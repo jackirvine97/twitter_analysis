@@ -4,10 +4,9 @@ import matplotlib.pyplot as plt
 from textblob import TextBlob
 import tweepy
 
-# Authenticate to Twitter
+# Authenticate to Twitter and instantiate API.
 auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-
 api = tweepy.API(auth)
 
 pret_tweets = api.search(
@@ -29,7 +28,7 @@ greggs_polarity = [TextBlob(tweet.text).sentiment.polarity for tweet in greggs_t
 greggs_subjectivity = [TextBlob(tweet.text).sentiment.subjectivity for tweet in greggs_tweets]
 
 # TODO: determine better way to visualise results.
-plt.scatter(pret_polarity, pret_polarity, label="Pret")
+plt.scatter(pret_polarity, pret_subjectivity, label="Pret")
 plt.scatter(greggs_polarity, greggs_subjectivity, label="Greggs")
 plt.xlabel("Polarity")
 plt.ylabel("Subjectivity")
