@@ -1,11 +1,9 @@
 """This script looks up a specified user."""
 import tweepy
 
-# Authenticate to Twitter
+# Authenticate to Twitter and instantiate API.
 auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-
-# Create API object
 api = tweepy.API(auth)
 
 user = api.get_user("BBCJonSopel")
