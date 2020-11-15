@@ -1,4 +1,4 @@
-"""This script generates a wordcloud in the shape of a Pret a Manger star."""
+"""This script generates a star shaped wordcloud."""
 
 import matplotlib.pyplot as plt
 import numpy as np
