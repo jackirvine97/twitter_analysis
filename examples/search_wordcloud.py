@@ -8,7 +8,7 @@ auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
-search_term = "ofgem"
+search_term = "pret"
 number_of_tweets = 700
 
 tweets = tweepy.Cursor(api.search, q=search_term, lang="en").items(number_of_tweets)
