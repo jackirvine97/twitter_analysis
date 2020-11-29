@@ -18,7 +18,7 @@ conda activate env_name
 Finally install the requirements for querying Twitter:
 
 ```
-conda install --yes --file --requirements.txtßß
+conda install --yes --file --requirements.txt
 ```
 
 ## Useful Guides
