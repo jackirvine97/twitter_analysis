@@ -6,6 +6,7 @@ from PIL import Image
 import re
 import time
 import tweepy
+from utils import search_past_7_days
 from wordcloud import STOPWORDS, WordCloud
 
 # Authenticate to Twitter and instantiate API.
@@ -13,11 +14,11 @@ auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
-search_term = ["pret a manger"]
-number_of_tweets = 2000
+search_term = ["brexit"]
+number_of_tweets = 7500
 
 # Collect tweets.
-tweets = tweepy.Cursor(api.search, q=search_term, lang="en").items(number_of_tweets)
+tweets = search_past_7_days(search_term, api, max_tweets=number_of_tweets)
 tweets_text = [tweet.text for tweet in tweets]
 tweet_count = len(tweets_text)
 
@@ -37,13 +38,14 @@ STOPWORDS.update(["pret", "manger", "pret a manger", "retweet", "pretamanger",
 words = [w for w in words if w not in STOPWORDS]
 filtered_string = ','.join(words)
 
-mask = np.array(Image.open('star.png'))
+# Uncomment to load in mask.
+# mask = np.array(Image.open('star.png'))
 
 wordcloud = WordCloud(
     background_color="white",
     width=1600, height=800,
     max_words=200,
-    mask=mask,
+    # mask=mask,
 )
 wordcloud.generate(filtered_string)
 
