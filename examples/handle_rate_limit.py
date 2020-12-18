@@ -19,3 +19,17 @@ for tweet in api.search(q=search_term, lang="en", rpp=10, count=100):
     print("************************************")
 
 print(f"Number of tweets scraped: {len(tweets)}")
+
+# above omitted for brevity
+c = tweepy.Cursor(api.search,
+                       q=search,
+                       include_entities=True).items()
+while True:
+    try:
+        tweet = c.next()
+        # Insert into db
+    except tweepy.TweepError:
+        time.sleep(60 * 15)
+        continue
+    except StopIteration:
+        break
