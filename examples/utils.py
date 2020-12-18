@@ -1,8 +1,9 @@
 """Temporary collection of utility functions.
 TODO - determine better utility strategy to avoid import errors."""
+import tweepy
 
 
-def search_past_7_days(search_term, max_tweets):
+def search_past_7_days(search_term, api, *, max_tweets=100):
     """Returns specified number of tweets within the last 7 days.
 
     Parameters
@@ -10,7 +11,7 @@ def search_past_7_days(search_term, max_tweets):
     search_term: :obj:`str`
         Search query.
     max_tweets: :obj:`int`
-        Maximum number of tweets to be scraped.
+        Maximum number of tweets to be scraped. Default is 100.
 
     Returns
     -------
