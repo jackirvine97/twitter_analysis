@@ -18,7 +18,6 @@ cursor = tweepy.Cursor(
     include_entities=True).items(num_tweets)
 
 # Infinite data gathering loop.
-count = 0
 data = []
 while True:
     try:
