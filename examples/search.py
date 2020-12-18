@@ -2,12 +2,6 @@
 import tweepy
 from utils import search_past_7_days
 
-# Variables that contains the user credentials to access Twitter API
-API_KEY = "QqGGXnpQPvifxKoNQgvNmOy7c"
-API_KEY_SECRET = "AJ54J47YPdbhvEdyZprFqN4bmyblNGFeazWDfPWOauY6diVIek"
-ACCESS_TOKEN = "1848494462-sRVdZy86BLjY8IHOqyubfEB8W8ralXQLtupgHlE"
-ACCESS_TOKEN_SECRET = "RHvLeHtuc9hafG08Mq3fNVAIQ9oPPUqLnnU6P7kcxCLNG"
-
 # Authenticate to Twitter and instantiate API.
 auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
