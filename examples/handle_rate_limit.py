@@ -1,4 +1,6 @@
-"""This searches for a specified term."""
+"""This script uses exception handling to increase the number of real time
+tweets that can be scraped."""
+import time
 import tweepy
 
 # Authenticate to Twitter and instantiate API.
@@ -6,30 +8,29 @@ auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
-# Scrape twitter. Note a free twitter developer account only supports up to
-# 100 tweets per request. If a premium account is created the `search_full_archive`
-# method can be used.
-# See: https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/overview
 search_term = "golf"
-tweets = []
-for tweet in api.search(q=search_term, lang="en", rpp=10, count=100):
-    tweets.append(tweet)
-    print(tweet.user.name)
-    print(tweet.text)
-    print("************************************")
+num_tweets = 1
 
-print(f"Number of tweets scraped: {len(tweets)}")
+# Handle pagination using the cursor object.
+cursor = tweepy.Cursor(
+    api.search,
+    q=search_term,
+    include_entities=True).items(num_tweets)
 
-# above omitted for brevity
-c = tweepy.Cursor(api.search,
-                       q=search,
-                       include_entities=True).items()
+# Infinite data gathering loop.
+count = 0
+data = []
 while True:
     try:
-        tweet = c.next()
-        # Insert into db
+        tweet = cursor.next()
+        data.append(tweet)
     except tweepy.TweepError:
+        print("Entering except block, waiting...")
         time.sleep(60 * 15)
+        print("Continuing search...")
         continue
     except StopIteration:
+        # Entered when num_tweets reached
         break
+
+print(len(data))
