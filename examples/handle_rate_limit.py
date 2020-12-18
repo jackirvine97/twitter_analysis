@@ -17,19 +17,19 @@ cursor = tweepy.Cursor(
     q=search_term,
     include_entities=True).items(num_tweets)
 
-# Infinite data gathering loop.
-data = []
+# Gather the date, pausing 15 minutes anytime the request limit is hit.
+tweet_data = []
 while True:
     try:
         tweet = cursor.next()
-        data.append(tweet)
+        tweet_data.append(tweet)
     except tweepy.TweepError:
         print("Entering except block, waiting...")
         time.sleep(60 * 15)
         print("Continuing search...")
         continue
     except StopIteration:
-        # Entered when num_tweets reached
+        # Entered when `num_tweets` reached.
         break
 
-print(len(data))
+print(len(tweet_data))
