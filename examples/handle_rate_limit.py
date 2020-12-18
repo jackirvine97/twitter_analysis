@@ -17,7 +17,7 @@ cursor = tweepy.Cursor(
     q=search_term,
     include_entities=True).items(num_tweets)
 
-# Gather the date, pausing 15 minutes anytime the request limit is hit.
+# Gather the date, pausing 15 minutes any time the request limit is hit.
 tweet_data = []
 while True:
     try:
