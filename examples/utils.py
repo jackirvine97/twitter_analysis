@@ -1,5 +1,7 @@
 """Temporary collection of utility functions.
 TODO - determine better utility strategy to avoid import errors."""
+from datetime import date
+import json
 import time
 import tweepy
 
@@ -46,3 +48,24 @@ def search_past_7_days(search_term, api, *, max_tweets=100, language="en"):
             break
 
     return tweet_data
+
+
+def save_tweets_as_json(tweet_list, search_term, filename):
+
+    data_dict = {}
+    metadata = {}
+    tweet_dict = {}
+
+    metadata["date_collected"] = date.today()
+    metadata["num_tweets"] = len(tweet_list)
+    metadata["search_term"] = search_term
+    metadata[""] = 
+    metadata[""] = 
+
+    data_dict["metadata"] = metadata
+
+    # Save `data_dict`as json file.
+    json_file = open(filename, 'wb')
+    json.dump(data_dict, json_file, indent=4, sort_keys=True)
+    json_file.close()
+    return
