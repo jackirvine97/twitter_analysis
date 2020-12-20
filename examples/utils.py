@@ -53,7 +53,7 @@ def search_past_7_days(search_term, api, *, max_tweets=100, language="en"):
 
 
 def save_tweets_as_json(tweet_list, *, filename, search_term):
-    """Extracts data from tweets and saves as json file.
+    """Extracts data from tweets and saves as JSON file.
 
     Parameters
     ----------
@@ -62,9 +62,9 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
     search_term: :obj:`str`
         Query term used to extract the tweets in `tweet_list`.
     filename: :obj:`str`
-        Name for json file to be saved, including relative path from working
-        directory to target destination. Json file extension will be appended
-        automatically if not included in this argument.
+        Name of JSON file to be saved, including relative path from working
+        directory to target destination. JSON file extension (.json) will be
+        appended automatically if not included in this argument.
 
     """
 
