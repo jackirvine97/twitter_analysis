@@ -72,9 +72,9 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
     metadata = {}
     tweets = []
 
-    date_format = "%Y-%m-%d %H:%M:%S"
+    search_date_str = date.today().strftime("%d-%b-%Y")
 
-    metadata["date_collected"] = date.today().strftime(date_format)
+    metadata["date_collected"] = search_date_str
     metadata["num_tweets"] = len(tweet_list)
     metadata["search_term"] = search_term
     data_dict["metadata"] = metadata
@@ -82,7 +82,7 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
     for tweet in tweet_list:
         single_tweet_dict = {}
         single_tweet_dict['text'] = tweet.text
-        single_tweet_dict['created_at'] = tweet.created_at.strftime(date_format)
+        single_tweet_dict['created_at'] = tweet.created_at.strftime("%d-%b-%Y %H:%M:%S")
         single_tweet_dict['id_str'] = tweet.id_str
         single_tweet_dict['retweet_count'] = tweet.retweet_count
         single_tweet_dict['favorite_count'] = tweet.favorite_count
@@ -97,9 +97,7 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
     if ext != ".json":
         print(f"The extension {ext} is invalid. Replacing with '.json'")
         ext = ".json"
-    filename = root + ext
-
-    print(data_dict)
+    filename = f"{root}-{search_date_str}{ext}"
 
     with open(filename, 'w') as json_file:
         json.dump(data_dict, json_file)
