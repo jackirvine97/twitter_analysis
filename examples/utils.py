@@ -2,6 +2,7 @@
 TODO - determine better utility strategy to avoid import errors."""
 from datetime import date
 import json
+import os
 import time
 import tweepy
 
@@ -50,22 +51,56 @@ def search_past_7_days(search_term, api, *, max_tweets=100, language="en"):
     return tweet_data
 
 
-def save_tweets_as_json(tweet_list, search_term, filename):
+def save_tweets_as_json(tweet_list, *, filename, search_term):
+    """Extracts data from tweets and saves as json file.
+
+    Parameters
+    ----------
+    tweet_list: :obj:`list`
+        List of :obj:`Tweet` to be saved.
+    search_term: :obj:`str`
+        Query term used to extract the tweets in `tweet_list`.
+    filename: :obj:`str`
+        Name for json file to be saved, including relative path from working
+        directory to target destination. Json file extension will be appended
+        automatically if not included in this argument.
+
+    """
 
     data_dict = {}
     metadata = {}
-    tweet_dict = {}
+    tweets = []
 
-    metadata["date_collected"] = date.today()
+    date_format = "%Y-%m-%d %H:%M:%S"
+
+    metadata["date_collected"] = date.today().strftime(date_format)
     metadata["num_tweets"] = len(tweet_list)
     metadata["search_term"] = search_term
-    metadata[""] = 
-    metadata[""] = 
-
     data_dict["metadata"] = metadata
 
-    # Save `data_dict`as json file.
-    json_file = open(filename, 'wb')
-    json.dump(data_dict, json_file, indent=4, sort_keys=True)
-    json_file.close()
+    for tweet in tweet_list:
+        single_tweet_dict = {}
+        single_tweet_dict['text'] = tweet.text
+        single_tweet_dict['created_at'] = tweet.created_at.strftime(date_format)
+        single_tweet_dict['id_str'] = tweet.id_str
+        single_tweet_dict['retweet_count'] = tweet.retweet_count
+        single_tweet_dict['favorite_count'] = tweet.favorite_count
+        single_tweet_dict['in_reply_to_screen_name'] = tweet.in_reply_to_screen_name
+        user_dictionery = tweet._json['user']
+        single_tweet_dict['followers_count'] = user_dictionery['followers_count']
+        single_tweet_dict['screen_name'] = user_dictionery['screen_name']
+        tweets.append(single_tweet_dict)
+    data_dict["tweets"] = tweets
+
+    root, ext = os.path.splitext(filename)
+    if ext != ".json":
+        print(f"The extension {ext} is invalid. Replacing with '.json'")
+        ext = ".json"
+    filename = root + ext
+
+    print(data_dict)
+
+    with open(filename, 'w') as json_file:
+        json.dump(data_dict, json_file)
+
     return
