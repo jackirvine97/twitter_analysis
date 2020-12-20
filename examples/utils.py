@@ -31,7 +31,8 @@ def search_past_7_days(search_term, api, *, max_tweets=100, language="en"):
         api.search,
         q=search_term,
         language=language,
-        include_entities=True).items(max_tweets)
+        include_entities=True
+    ).items(max_tweets)
 
     # Gather the date, pausing 15 minutes any time the request limit is hit.
     tweet_data = []
