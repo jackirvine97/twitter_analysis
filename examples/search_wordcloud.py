@@ -14,8 +14,8 @@ auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
-search_term = ["brexit"]
-number_of_tweets = 7500
+search_term = ["covid 19"]
+number_of_tweets = 500
 
 # Collect tweets.
 tweets = search_past_7_days(search_term, api, max_tweets=number_of_tweets)
