@@ -103,3 +103,22 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
         json.dump(data_dict, json_file)
 
     return
+
+
+def open_json(filename):
+    """Opens JSON file a dictionary.
+
+    Parameters
+    ----------
+    filename :obj:`str`
+        Name of JSON file being loaded.
+
+    Returns
+    -------
+    :obj:`dict`
+        Dictionary containing JSON data.
+
+    """
+    with open(filename) as json_file:
+        data_dict = json.load(json_file)
+    return data_dict
