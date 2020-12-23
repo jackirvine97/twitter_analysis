@@ -44,12 +44,13 @@ def main(mallet=True, score=False):
 
         """
         for sentence in sentences:
-            yield(gensim.utils.simple_preprocess(str(sentence), deacc=True))  # deacc=True removes punctuation.
+            # deacc=True removes punctuation.
+            yield(gensim.utils.simple_preprocess(str(sentence), deacc=True))
 
     data_words = list(sent_to_words(data))
 
-    # Build the bigram and trigram models.
-    bigram = gensim.models.Phrases(data_words, min_count=5, threshold=100)  # higher threshold fewer phrases.
+    # Build the bigram and trigram models - NB higher threshold yield fewer phrases.
+    bigram = gensim.models.Phrases(data_words, min_count=5, threshold=100)
     trigram = gensim.models.Phrases(bigram[data_words], threshold=100)
     # Cut down memory consumption of `Phrases` by discarding model state.
     bigram_mod = gensim.models.phrases.Phraser(bigram)
