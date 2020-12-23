@@ -158,9 +158,73 @@ def main(mallet=True, score=False):
             coherence_lda = coherence_model_lda.get_coherence()
             print('\nCoherence Score: ', coherence_lda)
 
-    # Visualise using pyLDAvis. Returns html that can be opened in chrome.
-    vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word, sort_topics=False)
-    pyLDAvis.save_html(vis, 'lda.html')
+    # # Visualise using pyLDAvis. Returns html that can be opened in chrome.
+    # vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word, sort_topics=False)
+    # pyLDAvis.save_html(vis, 'lda.html')
+
+    # The amount of functions required may warrant a topic model Class.
+    def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=3):
+        """Compute c_v coherence sensitivity to topic number.
+
+        Parameters
+        ----------
+        dictionary :obj:`dict`
+            Gensim dictionary.
+        corpus :
+            Gensim corpus
+        texts :obj:`list`
+            List of input texts.
+        limit :obj:`int`
+            Max number of topics.
+
+        Returns
+        -------
+        :obj:`list`
+            List of LDA topic models.
+        :obj:`list`
+            Coherence values corresponding to the LDA model with respective
+            number of topics.
+        """
+        coherence_values = []
+        model_list = []
+        for num_topics in range(start, limit, step):
+            model = gensim.models.wrappers.LdaMallet(
+                mallet_path,
+                corpus=corpus,
+                num_topics=num_topics,
+                id2word=id2word
+            )
+            model_list.append(model)
+            coherencemodel = CoherenceModel(
+                model=model,
+                texts=texts,
+                dictionary=dictionary,
+                coherence='c_v'
+            )
+            coherence_values.append(coherencemodel.get_coherence())
+
+        return model_list, coherence_values
+    # The following segment computes coherence across a range of values.
+    # limit = 15
+    # start = 13
+    # step = 1
+    # model_list, coherence_values = compute_coherence_values(
+    #     dictionary=id2word,
+    #     corpus=corpus,
+    #     texts=data_lemmatized,
+    #     start=start,
+    #     limit=limit,
+    #     step=step
+    # )
+    # x = range(start, limit, step)
+    # plt.plot(x, coherence_values)
+    # plt.xlabel("Num Topics")
+    # plt.ylabel("Coherence score")
+    # plt.legend(("coherence_values"), loc='best')
+    # plt.show()
+
+    for m, cv in zip(x, coherence_values):
+        print("Num Topics =", m, " has Coherence Value of", round(cv, 4))
 
     return
 
