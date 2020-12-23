@@ -20,8 +20,171 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
+def sent_to_words(sentences):
+    """Tokenises a sentence in a list of sentences into a list of words,
+    removing punctuation and unnecessary characters.
+
+    Parameters
+    ----------
+    sentences :obj:`list`
+        List of sentences to be tokenised.
+
+    """
+    for sentence in sentences:
+        # deacc=True removes punctuation.
+        yield(gensim.utils.simple_preprocess(str(sentence), deacc=True))
+
+
+def remove_stopwords(texts, stop_words):
+    """Removes stop words from list of words.
+
+    Parameters
+    ----------
+    stop_words :obj:`list`
+        List of words to be removed.
+
+    Returns
+    -------
+    :obj:`list`
+        Filtered list of words.
+
+    """
+    return [[word for word in simple_preprocess(str(doc)) if word not in stop_words] for doc in texts]
+
+
+def make_bigrams(texts, bigram_mod):
+    """Forms bigrams from text samples.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
+    return [bigram_mod[doc] for doc in texts]
+
+
+def make_trigrams(texts, trigram_mod):
+    """Forms trigrams from text samples.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
+    return [trigram_mod[bigram_mod[doc]] for doc in texts]
+
+
+def lemmatization(texts, nlp, allowed_postags=['NOUN', 'ADJ', 'VERB', 'ADV']):
+    """Group together inflected forms of the same word so they can be analysed
+    together.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    Notes
+    -----
+    See https://spacy.io/api/annotation for further information.
+
+    """
+    texts_out = []
+    for sent in texts:
+        doc = nlp(" ".join(sent))
+        texts_out.append(
+            [token.lemma_ for token in doc if token.pos_ in allowed_postags]
+        )
+    return texts_out
+
+
+def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=3):
+    """Compute c_v coherence sensitivity to topic number.
+
+    Parameters
+    ----------
+    dictionary :obj:`dict`
+        Gensim dictionary.
+    corpus :
+        Gensim corpus
+    texts :obj:`list`
+        List of input texts.
+    limit :obj:`int`
+        Max number of topics.
+
+    Returns
+    -------
+    :obj:`list`
+        List of LDA topic models.
+    :obj:`list`
+        Coherence values corresponding to the LDA model with respective
+        number of topics.
+
+    """
+    coherence_values = []
+    model_list = []
+    for num_topics in range(start, limit, step):
+        model = gensim.models.wrappers.LdaMallet(
+            mallet_path,
+            corpus=corpus,
+            num_topics=num_topics,
+            id2word=id2word
+        )
+        model_list.append(model)
+        coherencemodel = CoherenceModel(
+            model=model,
+            texts=texts,
+            dictionary=dictionary,
+            coherence='c_v'
+        )
+        coherence_values.append(coherencemodel.get_coherence())
+
+    return model_list, coherence_values
+
+
+def format_topics_sentences(ldamodel, corpus, texts):
+    """Returns dataframe breaking down most prevalent topic for each document.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    :obj:`pandas.DataFrame`
+        Dataframe showing dominant topic, topic percentage contribution, topic
+        keywords and the raw text for each document.
+
+    """
+    sent_topics_df = pd.DataFrame()
+
+    # Get main topic in each document
+    for i, row in enumerate(ldamodel[corpus]):
+        row = sorted(row, key=lambda x: (x[1]), reverse=True)
+        # Get the Dominant topic, Perc Contribution and Keywords for each document
+        for j, (topic_num, prop_topic) in enumerate(row):
+            if j == 0:  # => dominant topic
+                wp = ldamodel.show_topic(topic_num)
+                topic_keywords = ", ".join([word for word, prop in wp])
+                sent_topics_df = sent_topics_df.append(pd.Series([int(topic_num), round(prop_topic,4), topic_keywords]), ignore_index=True)
+            else:
+                break
+    sent_topics_df.columns = ['Dominant_Topic', 'Perc_Contribution', 'Topic_Keywords']
+
+    # Add original text to the end of the output
+    contents = pd.Series(texts)
+    sent_topics_df = pd.concat([sent_topics_df, contents], axis=1)
+    return (sent_topics_df)
+
+
 def main(mallet=True, score=False):
     """Script wrapper to prevent multiprocessing runtime errors."""
+
+    # Data preprocessing.
+
     stop_words = stopwords.words('english')
     stop_words.extend(['from', 'subject', 're', 'edu', 'use'])
 
@@ -33,20 +196,6 @@ def main(mallet=True, score=False):
     data = [re.sub('\s+', ' ', sent) for sent in data]
     data = [re.sub("\'", "", sent) for sent in data]
 
-    def sent_to_words(sentences):
-        """Tokenises a sentence in a list of sentences into a list of words,
-        removing punctuation and unnecessary characters.
-
-        Parameters
-        ----------
-        sentences :obj:`list`
-            List of sentences to be tokenised.
-
-        """
-        for sentence in sentences:
-            # deacc=True removes punctuation.
-            yield(gensim.utils.simple_preprocess(str(sentence), deacc=True))
-
     data_words = list(sent_to_words(data))
 
     # Build the bigram and trigram models - NB higher threshold yield fewer phrases.
@@ -56,38 +205,8 @@ def main(mallet=True, score=False):
     bigram_mod = gensim.models.phrases.Phraser(bigram)
     trigram_mod = gensim.models.phrases.Phraser(trigram)
 
-    # Define functions for stopwords, bigrams, trigrams and lemmatization
-    def remove_stopwords(texts):
-        """Removes stop words from list of words."""
-        return [[word for word in simple_preprocess(str(doc)) if word not in stop_words] for doc in texts]
-
-    def make_bigrams(texts):
-        """Forms bigrams from text samples."""
-        return [bigram_mod[doc] for doc in texts]
-
-    def make_trigrams(texts):
-        """Forms trigrams from text samples."""
-        return [trigram_mod[bigram_mod[doc]] for doc in texts]
-
-    def lemmatization(texts, allowed_postags=['NOUN', 'ADJ', 'VERB', 'ADV']):
-        """Group together inflected forms of the same word so they can be analysed
-        together.
-
-        Notes
-        -----
-        See https://spacy.io/api/annotation for further information.
-
-        """
-        texts_out = []
-        for sent in texts:
-            doc = nlp(" ".join(sent))
-            texts_out.append(
-                [token.lemma_ for token in doc if token.pos_ in allowed_postags]
-            )
-        return texts_out
-
-    data_words_nostops = remove_stopwords(data_words)
-    data_words_bigrams = make_bigrams(data_words_nostops)
+    data_words_nostops = remove_stopwords(data_words, stop_words)
+    data_words_bigrams = make_bigrams(data_words_nostops, bigram_mod)
 
     # Initialize spacy 'en' model, keeping only tagger component (for efficiency)
     nlp = spacy.load('en', disable=['parser', 'ner'])
@@ -95,13 +214,16 @@ def main(mallet=True, score=False):
     # Create ID-frequency pairs for each word in document.
     data_lemmatized = lemmatization(
         data_words_bigrams,
-        allowed_postags=['NOUN', 'ADJ', 'VERB', 'ADV']
+        allowed_postags=['NOUN', 'ADJ', 'VERB', 'ADV'],
+        nlp=nlp
     )
     id2word = corpora.Dictionary(data_lemmatized)
     texts = data_lemmatized
     corpus = [id2word.doc2bow(text) for text in texts]
     # Human readable format of corpus (term-frequency)
     # print([[(id2word[id], freq) for id, freq in cp] for cp in corpus[:1]])
+
+    # Instantiate LDA model.
 
     if mallet:
         """Mallet's method is based on Gibb's sampling, which is a more accurate
@@ -162,48 +284,6 @@ def main(mallet=True, score=False):
     # vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word, sort_topics=False)
     # pyLDAvis.save_html(vis, 'lda.html')
 
-    # The amount of functions required may warrant a topic model Class.
-    def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=3):
-        """Compute c_v coherence sensitivity to topic number.
-
-        Parameters
-        ----------
-        dictionary :obj:`dict`
-            Gensim dictionary.
-        corpus :
-            Gensim corpus
-        texts :obj:`list`
-            List of input texts.
-        limit :obj:`int`
-            Max number of topics.
-
-        Returns
-        -------
-        :obj:`list`
-            List of LDA topic models.
-        :obj:`list`
-            Coherence values corresponding to the LDA model with respective
-            number of topics.
-        """
-        coherence_values = []
-        model_list = []
-        for num_topics in range(start, limit, step):
-            model = gensim.models.wrappers.LdaMallet(
-                mallet_path,
-                corpus=corpus,
-                num_topics=num_topics,
-                id2word=id2word
-            )
-            model_list.append(model)
-            coherencemodel = CoherenceModel(
-                model=model,
-                texts=texts,
-                dictionary=dictionary,
-                coherence='c_v'
-            )
-            coherence_values.append(coherencemodel.get_coherence())
-
-        return model_list, coherence_values
     # The following segment computes coherence across a range of values.
     # limit = 15
     # start = 13
@@ -223,8 +303,15 @@ def main(mallet=True, score=False):
     # plt.legend(("coherence_values"), loc='best')
     # plt.show()
 
-    for m, cv in zip(x, coherence_values):
-        print("Num Topics =", m, " has Coherence Value of", round(cv, 4))
+    # for m, cv in zip(x, coherence_values):
+    #     print("Num Topics =", m, " has Coherence Value of", round(cv, 4))
+
+    df_topic_sents_keywords = format_topics_sentences(ldamodel=ldamallet, corpus=corpus, texts=data)
+    df_dominant_topic = df_topic_sents_keywords.reset_index()
+    df_dominant_topic.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords', 'Text']
+
+    # Show
+    print(df_dominant_topic.head(10))
 
     return
 
