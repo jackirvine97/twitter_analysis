@@ -313,7 +313,16 @@ def main(mallet=True, score=False):
     df_dominant_topic = df_topic_sents_keywords.reset_index()
     df_dominant_topic.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords', 'Text']
 
-    # Show
+    # Find most representative document for each topic
+    sent_topics_sorteddf_mallet = pd.DataFrame()
+    sent_topics_outdf_grpd = df_topic_sents_keywords.groupby('Dominant_Topic')
+
+    for i, grp in sent_topics_outdf_grpd:
+        sent_topics_sorteddf_mallet = pd.concat([sent_topics_sorteddf_mallet,
+                                                 grp.sort_values(['Perc_Contribution'], ascending=[0]).head(1)],
+                                                axis=0)
+    sent_topics_sorteddf_mallet.reset_index(drop=True, inplace=True)
+    sent_topics_sorteddf_mallet.columns = ['Topic_Num', "Topic_Perc_Contrib", "Keywords", "Text"]
     print(df_dominant_topic.head(10))
 
     return
