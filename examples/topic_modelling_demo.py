@@ -314,16 +314,24 @@ def main(mallet=True, score=False):
     df_dominant_topic.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords', 'Text']
 
     # Find most representative document for each topic
-    sent_topics_sorteddf_mallet = pd.DataFrame()
+    best_doc_per_topic_df = pd.DataFrame()
     sent_topics_outdf_grpd = df_topic_sents_keywords.groupby('Dominant_Topic')
 
     for i, grp in sent_topics_outdf_grpd:
-        sent_topics_sorteddf_mallet = pd.concat([sent_topics_sorteddf_mallet,
-                                                 grp.sort_values(['Perc_Contribution'], ascending=[0]).head(1)],
-                                                axis=0)
-    sent_topics_sorteddf_mallet.reset_index(drop=True, inplace=True)
-    sent_topics_sorteddf_mallet.columns = ['Topic_Num', "Topic_Perc_Contrib", "Keywords", "Text"]
-    print(df_dominant_topic.head(10))
+        best_doc_per_topic_df = pd.concat([best_doc_per_topic_df,
+                                           grp.sort_values(['Perc_Contribution'],
+                                           ascending=[0]).head(1)], axis=0)
+    best_doc_per_topic_df.reset_index(drop=True, inplace=True)
+    best_doc_per_topic_df.columns = ['Topic_Num', "Topic_Perc_Contrib", "Keywords", "Text"]
+    best_doc_per_topic_df.to_excel("best_doc_per_topic.xlsx")
+
+    # Tabulate the topic distribution across documents.
+    topic_counts = df_topic_sents_keywords['Dominant_Topic'].value_counts()
+    topic_contribution = round(topic_counts/topic_counts.sum(), 4)
+    topic_num_keywords = df_topic_sents_keywords[['Dominant_Topic', 'Topic_Keywords']]
+    df_dominant_topics = pd.concat([topic_num_keywords, topic_counts, topic_contribution], axis=1)
+    df_dominant_topics.columns = ['Dominant_Topic', 'Topic_Keywords', 'Num_Documents', 'Perc_Documents']
+    df_dominant_topic.to_excel("dominant_topic.xlsx")
 
     return
 
