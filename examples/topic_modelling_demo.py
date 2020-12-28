@@ -329,13 +329,11 @@ def main(mallet=True, score=False):
     topic_num_keywords = df_topic_sents_keywords[["Dominant_Topic", "Topic_Keywords"]].drop_duplicates()
     topic_counts = df_topic_sents_keywords['Dominant_Topic'].value_counts() # Count docs per topic.
     topic_counts.name = "Count"
-    print(topic_counts)
     topic_perc_docs = round(topic_counts/topic_counts.sum(), 4)
     topic_perc_docs.name = "Percentage_Documents"
     temp_topic_distribution_df = topic_num_keywords.join(topic_counts, on="Dominant_Topic")
     topic_distribution_df = temp_topic_distribution_df.join(topic_perc_docs, on="Dominant_Topic")
     topic_distribution_df.reset_index()
-    print(topic_distribution_df)
     topic_distribution_df.to_excel("topic_distribution.xlsx")
 
     return
