@@ -9,12 +9,14 @@ import gensim.corpora as corpora
 from gensim.utils import simple_preprocess
 from gensim.models import CoherenceModel
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 from nltk.corpus import stopwords
 import numpy as np
 import pandas as pd
 import pyLDAvis
 import pyLDAvis.gensim
 import spacy
+from wordcloud import WordCloud, STOPWORDS
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.ERROR)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -335,6 +337,36 @@ def main(mallet=True, score=False):
     dominant_topic_distribution_df = temp_dominant_topic_distribution_df.join(topic_perc_docs, on="Dominant_Topic")
     dominant_topic_distribution_df.reset_index(drop=True, inplace=True)
     dominant_topic_distribution_df.to_excel("dominant_topic_distribution.xlsx")
+
+    # Plot wordclouds for the first 9 topics by index.
+    cols = [color for name, color in mcolors.TABLEAU_COLORS.items()]
+    cloud = WordCloud(
+        stopwords=stop_words,
+        background_color='white',
+        width=2500,
+        height=1800,
+        max_words=10,
+        colormap='tab10',
+        color_func=lambda *args, **kwargs: cols[i],
+        prefer_horizontal=1.0
+    )
+    topics = ldamallet.show_topics(num_topics=9, formatted=False)
+
+    fig, axes = plt.subplots(3, 3, figsize=(3, 3), sharex=True, sharey=True)
+
+    for i, ax in enumerate(axes.flatten()):
+        fig.add_subplot(ax)
+        topic_words = dict(topics[i][1])
+        cloud.generate_from_frequencies(topic_words, max_font_size=300)
+        plt.gca().imshow(cloud)
+        plt.gca().set_title('Topic ' + str(i), fontdict=dict(size=11))
+        plt.gca().axis('off')
+
+    plt.subplots_adjust(wspace=0, hspace=0)
+    plt.axis('off')
+    plt.margins(x=0, y=0)
+    plt.tight_layout()
+    plt.show()
 
     return
 
