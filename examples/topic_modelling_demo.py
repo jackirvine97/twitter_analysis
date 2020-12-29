@@ -308,17 +308,19 @@ def main(mallet=True, score=False):
     # for m, cv in zip(x, coherence_values):
     #     print("Num Topics =", m, " has Coherence Value of", round(cv, 4))
 
+    # Find dominant topic for each document.
     df_topic_sents_keywords = format_topics_sentences(ldamodel=ldamallet, corpus=corpus, texts=data)
-    df_dominant_topic = df_topic_sents_keywords.reset_index()
-    df_dominant_topic.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords', 'Text']
+    dominant_topic_df = df_topic_sents_keywords.reset_index(drop=True)
+    print(dominant_topic_df.shape)
+    print(dominant_topic_df)
+    dominant_topic_df.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords', 'Text']
 
-    # Find most representative document for each topic
+    # Find most representative document for each topic.
     best_doc_per_topic_df = pd.DataFrame()
     sent_topics_outdf_grpd = df_topic_sents_keywords.groupby('Dominant_Topic')
-
     for i, grp in sent_topics_outdf_grpd:
         best_doc_per_topic_df = pd.concat([best_doc_per_topic_df,
-                                           grp.sort_values(['Perc_Contribution'],
+                                          grp.sort_values(['Perc_Contribution'],
                                            ascending=[0]).head(1)], axis=0)
     best_doc_per_topic_df.reset_index(drop=True, inplace=True)
     best_doc_per_topic_df.columns = ['Topic_Num', "Topic_Perc_Contrib", "Keywords", "Text"]
