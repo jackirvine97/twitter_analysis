@@ -169,10 +169,7 @@ def format_topics_sentences(ldamodel, corpus, texts):
             if j == 0:  # => dominant topic
                 wp = ldamodel.show_topic(topic_num)
                 topic_keywords = ", ".join([word for word, prop in wp])
-                sent_topics_df = sent_topics_df.append(
-                    pd.Series([int(topic_num), round(prop_topic, 4), topic_keywords]),
-                    ignore_index=True
-                )
+                sent_topics_df = sent_topics_df.append(pd.Series([int(topic_num), round(prop_topic, 4), topic_keywords]), ignore_index=True)
             else:
                 break
     sent_topics_df.columns = ['Dominant_Topic', 'Perc_Contribution', 'Topic_Keywords']
@@ -180,118 +177,108 @@ def format_topics_sentences(ldamodel, corpus, texts):
     # Add original text to the end of the output
     contents = pd.Series(texts)
     sent_topics_df = pd.concat([sent_topics_df, contents], axis=1)
-    return (sent_topics_df)
+    return(sent_topics_df)
 
 
-def main(mallet=True, score=False, load_file="newsgroup_mallet_lda_model"):
+def main(mallet=True, score=False):
     """Script wrapper to prevent multiprocessing runtime errors."""
+
+    # Data preprocessing.
 
     stop_words = stopwords.words('english')
     stop_words.extend(['from', 'subject', 're', 'edu', 'use'])
 
     df = pd.read_json('https://raw.githubusercontent.com/selva86/datasets/master/newsgroups.json')
 
-    if load_file is not None:
-         # Compute Coherence Score
-        ldamallet = gensim.models.wrappers.LdaMallet.load(load_file)
-        print(type(ldamallet))
-        # corpus = ldamallet.corpus
-        id2word = ldamallet.id2word
-        lda_model = gensim.models.wrappers.ldamallet.malletmodel2ldamodel(ldamallet)
-        pprint(ldamallet.show_topics(num_topics=-1, formatted=False))
-    else:
-        # Data preprocessing.
+    # Convert to list and remove email addresses, new lines and single quotation marks.
+    data = df.content.values.tolist()
+    data = [re.sub('\S*@\S*\s?', '', sent) for sent in data]
+    data = [re.sub('\s+', ' ', sent) for sent in data]
+    data = [re.sub("\'", "", sent) for sent in data]
 
-        # Convert to list and remove email addresses, new lines and single quotation marks.
-        data = df.content.values.tolist()
-        data = [re.sub('\S*@\S*\s?', '', sent) for sent in data]
-        data = [re.sub('\s+', ' ', sent) for sent in data]
-        data = [re.sub("\'", "", sent) for sent in data]
+    data_words = list(sent_to_words(data))
 
-        data_words = list(sent_to_words(data))
+    # Build the bigram and trigram models - NB higher threshold yield fewer phrases.
+    bigram = gensim.models.Phrases(data_words, min_count=5, threshold=100)
+    trigram = gensim.models.Phrases(bigram[data_words], threshold=100)
+    # Cut down memory consumption of `Phrases` by discarding model state.
+    bigram_mod = gensim.models.phrases.Phraser(bigram)
+    trigram_mod = gensim.models.phrases.Phraser(trigram)
 
-        # Build the bigram and trigram models - NB higher threshold yield fewer phrases.
-        bigram = gensim.models.Phrases(data_words, min_count=5, threshold=100)
-        trigram = gensim.models.Phrases(bigram[data_words], threshold=100)
-        # Cut down memory consumption of `Phrases` by discarding model state.
-        bigram_mod = gensim.models.phrases.Phraser(bigram)
-        trigram_mod = gensim.models.phrases.Phraser(trigram)
+    data_words_nostops = remove_stopwords(data_words, stop_words)
+    data_words_bigrams = make_bigrams(data_words_nostops, bigram_mod)
 
-        data_words_nostops = remove_stopwords(data_words, stop_words)
-        data_words_bigrams = make_bigrams(data_words_nostops, bigram_mod)
+    # Initialize spacy 'en' model, keeping only tagger component (for efficiency).
+    nlp = spacy.load('en', disable=['parser', 'ner'])
 
-        # Initialize spacy 'en' model, keeping only tagger component (for efficiency).
-        nlp = spacy.load('en', disable=['parser', 'ner'])
+    # Create ID-frequency pairs for each word in document.
+    data_lemmatized = lemmatization(
+        data_words_bigrams,
+        allowed_postags=['NOUN', 'ADJ', 'VERB', 'ADV'],
+        nlp=nlp
+    )
+    id2word = corpora.Dictionary(data_lemmatized)
+    texts = data_lemmatized
+    corpus = [id2word.doc2bow(text) for text in texts]
+    # Human readable format of corpus (term-frequency)
+    # print([[(id2word[id], freq) for id, freq in cp] for cp in corpus[:1]])
 
-        # Create ID-frequency pairs for each word in document.
-        data_lemmatized = lemmatization(
-            data_words_bigrams,
-            allowed_postags=['NOUN', 'ADJ', 'VERB', 'ADV'],
-            nlp=nlp
+    if mallet:
+        """Mallet's method is based on Gibb's sampling, which is a more accurate
+        fitting method than variational Bayes, used in standard GenSim modelling.
+        Requires mallet source code download (http://mallet.cs.umass.edu/). This
+        is a Java package and so requires a JDK. Note this can only be used for
+        demos as the JDK requires a 'low-cost' commercial license (see
+        https://docs.oracle.com/en/java/javase/index.html).
+
+        """
+        mallet_path = 'mallet-2.0.8/bin/mallet'
+        ldamallet = gensim.models.wrappers.LdaMallet(
+            mallet_path,
+            corpus=corpus,
+            num_topics=20,
+            id2word=id2word
         )
-        id2word = corpora.Dictionary(data_lemmatized)
-        texts = data_lemmatized
-        corpus = [id2word.doc2bow(text) for text in texts]
-        # Human readable format of corpus (term-frequency)
-        # print([[(id2word[id], freq) for id, freq in cp] for cp in corpus[:1]])
+        # Compute Coherence Score
+        coherence_model_ldamallet = CoherenceModel(
+            model=ldamallet,
+            texts=data_lemmatized,
+            dictionary=id2word,
+            coherence='c_v'
+        )
+        coherence_ldamallet = coherence_model_ldamallet.get_coherence()
+        lda_model = gensim.models.wrappers.ldamallet.malletmodel2ldamodel(ldamallet)
+        print('\nCoherence Score: ', coherence_ldamallet)
+        pprint(ldamallet.show_topics(num_topics=-1, formatted=False))
 
-        if mallet:
-            """Mallet's method is based on Gibb's sampling, which is a more accurate
-            fitting method than variational Bayes, used in standard GenSim modelling.
-            Requires mallet source code download (http://mallet.cs.umass.edu/). This
-            is a Java package and so requires a JDK. Note this can only be used for
-            demos as the JDK requires a 'low-cost' commercial license (see
-            https://docs.oracle.com/en/java/javase/index.html).
+    else:
+        # Use the standard GenSim LDA model.
+        lda_model = gensim.models.ldamodel.LdaModel(
+            corpus=corpus,
+            id2word=id2word,
+            num_topics=20,
+            random_state=100,
+            update_every=1,
+            chunksize=100,
+            passes=10,
+            alpha='auto',
+            per_word_topics=True
+        )
+        doc_lda = lda_model[corpus]
+        pprint(lda_model.print_topics())
 
-            """
-            mallet_path = 'mallet-2.0.8/bin/mallet'
-            ldamallet = gensim.models.wrappers.LdaMallet(
-                mallet_path,
-                corpus=corpus,
-                num_topics=20,
-                id2word=id2word
-            )
-            # Compute Coherence Score
-            coherence_model_ldamallet = CoherenceModel(
-                model=ldamallet,
+        if score:
+            # Compute perplexity - how 'surprised' the model is at new data.
+            # Compute topic coherence - measures how good the model is.
+            print('\nPerplexity: ', lda_model.log_perplexity(corpus))
+            coherence_model_lda = CoherenceModel(
+                model=lda_model,
                 texts=data_lemmatized,
                 dictionary=id2word,
                 coherence='c_v'
             )
-            coherence_ldamallet = coherence_model_ldamallet.get_coherence()
-            lda_model = gensim.models.wrappers.ldamallet.malletmodel2ldamodel(ldamallet)
-            print('\nCoherence Score: ', coherence_ldamallet)
-            pprint(ldamallet.show_topics(num_topics=-1, formatted=False))
-
-            ldamallet.save("newsgroup_mallet_lda_model")
-        else:
-            # Use the standard GenSim LDA model.
-            lda_model = gensim.models.ldamodel.LdaModel(
-                corpus=corpus,
-                id2word=id2word,
-                num_topics=20,
-                random_state=100,
-                update_every=1,
-                chunksize=100,
-                passes=10,
-                alpha='auto',
-                per_word_topics=True
-            )
-            doc_lda = lda_model[corpus]
-            pprint(lda_model.print_topics())
-
-            if score:
-                # Compute perplexity - how 'surprised' the model is at new data.
-                # Compute topic coherence - measures how good the model is.
-                print('\nPerplexity: ', lda_model.log_perplexity(corpus))
-                coherence_model_lda = CoherenceModel(
-                    model=lda_model,
-                    texts=data_lemmatized,
-                    dictionary=id2word,
-                    coherence='c_v'
-                )
-                coherence_lda = coherence_model_lda.get_coherence()
-                print('\nCoherence Score: ', coherence_lda)
+            coherence_lda = coherence_model_lda.get_coherence()
+            print('\nCoherence Score: ', coherence_lda)
 
     # Visualise using pyLDAvis. Returns html that can be opened in chrome.
     vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word, sort_topics=False)
