@@ -310,9 +310,7 @@ def main(mallet=True, score=False):
 
     # Find dominant topic for each document.
     df_topic_sents_keywords = format_topics_sentences(ldamodel=ldamallet, corpus=corpus, texts=data)
-    dominant_topic_df = df_topic_sents_keywords.reset_index(drop=True)
-    print(dominant_topic_df.shape)
-    print(dominant_topic_df)
+    dominant_topic_df = df_topic_sents_keywords.reset_index()
     dominant_topic_df.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords', 'Text']
 
     # Find most representative document for each topic.
