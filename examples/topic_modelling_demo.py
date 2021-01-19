@@ -606,8 +606,8 @@ def main(mallet=True, score=False):
     id2word = corpora.Dictionary(data_lemmatized)
     texts = data_lemmatized
     corpus = [id2word.doc2bow(text) for text in texts]
-    # Human readable format of corpus (term-frequency)
-    # print([[(id2word[id], freq) for id, freq in cp] for cp in corpus[:1]])
+
+    # Build LDA model.
 
     if mallet:
         """Mallet's method is based on Gibb's sampling, which is a more accurate
