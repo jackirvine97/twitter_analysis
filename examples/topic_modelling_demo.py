@@ -623,7 +623,8 @@ def main(mallet=True, score=False):
         pprint(ldamallet.show_topics(num_topics=-1, formatted=False))
 
     else:
-        # Use the standard GenSim LDA model.
+        # Use the standard GenSim LDA model. This is currently not supported for
+        # post processing or visualisation.
         lda_model = gensim.models.ldamodel.LdaModel(
             corpus=corpus,
             id2word=id2word,
