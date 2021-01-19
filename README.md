@@ -1,6 +1,10 @@
 # twitter_analysis
 Playground for interacting with the Twitter API.
 
+## Context
+
+This repository hosts scripts for querying the Twitter API and text analysis of tweets. At present it is in an exploratory phase of development and as such it is a collection of sample scripts. As use cases are refined this may evolve.
+
 ## Installation
 
 These scripts are best run in a conda virtual environment (conda best installed via [miniconda](https://docs.conda.io/en/latest/miniconda.html)):
