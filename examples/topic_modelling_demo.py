@@ -572,7 +572,7 @@ def main(mallet=True, score=False):
     # Data preprocessing.
 
     stop_words = stopwords.words('english')
-    stop_words.extend(['from', 'subject', 're', 'edu', 'use'])
+    stop_words.extend(['from', 'subject', 're', 'edu', 'use', 'ax'])
 
     df = pd.read_json('https://raw.githubusercontent.com/selva86/datasets/master/newsgroups.json')
 
