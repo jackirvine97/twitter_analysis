@@ -56,7 +56,9 @@ def remove_stopwords(texts, stop_words):
         Filtered list of words.
 
     """
-    return [[word for word in simple_preprocess(str(doc)) if word not in stop_words] for doc in texts]
+    stopwords_removed = [[word for word in simple_preprocess(str(doc))
+                         if word not in stop_words] for doc in texts]
+    return stopwords_removed
 
 
 def make_bigrams(texts, bigram_mod):
