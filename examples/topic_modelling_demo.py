@@ -740,5 +740,17 @@ def main(mallet=True, score=False):
     return
 
 
+"""
+TODO:
+- Make work for the gensim model
+- Visualise
+    - Plot bigram frequency.
+    - Plot trigram frequency.
+- Break into functions
+- Complete docstrings
+- Determine if new object is required or just a series of functions.
+- Sort out texts issue.
+"""
+
 if __name__ == "__main__":
     main()
