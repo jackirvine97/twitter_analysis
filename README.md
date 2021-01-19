@@ -3,7 +3,7 @@ Playground for interacting with the Twitter API.
 
 ## Installation
 
-These scripts are best run in a conda virtual environment (conda best installed via miniconda [https://docs.conda.io/en/latest/miniconda.html]):
+These scripts are best run in a conda virtual environment (conda best installed via [miniconda](https://docs.conda.io/en/latest/miniconda.html):
 
 ```
 conda create --name env_name
