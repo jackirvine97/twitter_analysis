@@ -634,8 +634,9 @@ def main(mallet=True, score=False):
         )
         coherence_ldamallet = coherence_model_ldamallet.get_coherence()
         lda_model = gensim.models.wrappers.ldamallet.malletmodel2ldamodel(ldamallet)
+        topic_keyword_wt = ldamallet.show_topics(num_topics=-1, formatted=False)
         print('\nCoherence Score: ', coherence_ldamallet)
-        pprint(ldamallet.show_topics(num_topics=-1, formatted=False))
+        pprint(topic_keyword_wt)
 
     else:
         # Use the standard GenSim LDA model. This is currently not supported for
@@ -652,7 +653,6 @@ def main(mallet=True, score=False):
             per_word_topics=True
         )
         doc_lda = lda_model[corpus]
-        pprint(lda_model.print_topics())
 
         if score:
             # Compute perplexity - how 'surprised' the model is at new data.
