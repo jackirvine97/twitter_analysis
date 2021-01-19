@@ -652,11 +652,7 @@ def main(mallet=True, score=False):
             coherence_lda = coherence_model_lda.get_coherence()
             print('\nCoherence Score: ', coherence_lda)
 
-    # Visualise using pyLDAvis. Returns html that can be opened in chrome.
-    vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word, sort_topics=False)
-    pyLDAvis.save_html(vis, 'lda.html')
-
-    # The following segment computes coherence across a range of values.
+    # # The following segment computes coherence across a range of values.
     # limit = 15
     # start = 13
     # step = 1
