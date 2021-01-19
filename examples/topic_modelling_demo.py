@@ -1,25 +1,28 @@
 """This script is WIP and may change significantly during development."""
-import re
-import logging
+from collections import Counter
 from pprint import pprint
+from random import shuffle
+import re
 import warnings
 
+from bokeh.models import Label
+from bokeh.plotting import figure, output_file, show
 import gensim
 import gensim.corpora as corpora
 from gensim.utils import simple_preprocess
 from gensim.models import CoherenceModel
+import math
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import matplotlib.colors as mcolors
+from matplotlib.ticker import FuncFormatter
 from nltk.corpus import stopwords
 import numpy as np
 import pandas as pd
-import pyLDAvis
-import pyLDAvis.gensim
+import seaborn as sns
+from sklearn.manifold import TSNE
 import spacy
 from wordcloud import WordCloud, STOPWORDS
-
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.ERROR)
-warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def sent_to_words(sentences):
