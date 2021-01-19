@@ -705,31 +705,26 @@ def main(mallet=True, score=False):
     best_doc_per_topic_df.columns = ['Topic_Num', "Topic_Perc_Contrib", "Keywords", "Text"]
     best_doc_per_topic_df.to_excel("best_doc_per_topic.xlsx")
 
-    # Tabulate the dominant topic distribution across documents. Note this is different to the marginal
-    # topic distribution charted in pyLDAvis (which is the % of words in the corpus a given topic covers).
+    # Tabulate the dominant topic distribution across documents. Note this is
+    # different to the marginal topic distribution charted in pyLDAvis (which is
+    # the % of words in the corpus a given topic covers).
     topic_num_keywords = df_topic_sents_keywords[["Dominant_Topic", "Topic_Keywords"]].drop_duplicates()
-    topic_counts = df_topic_sents_keywords['Dominant_Topic'].value_counts()  # Count docs per topic.
+    topic_counts = df_topic_sents_keywords['Dominant_Topic'].value_counts()
     topic_counts.name = "Count"
     topic_perc_docs = round(topic_counts/topic_counts.sum(), 4)
     topic_perc_docs.name = "Percentage_Documents"
-    temp_dominant_topic_distribution_df = topic_num_keywords.join(topic_counts, on="Dominant_Topic")
-    dominant_topic_distribution_df = temp_dominant_topic_distribution_df.join(topic_perc_docs, on="Dominant_Topic")
+    temp_dominant_topic_distribution_df = topic_num_keywords.join(
+        topic_counts,
+        on="Dominant_Topic"
+    )
+    dominant_topic_distribution_df = temp_dominant_topic_distribution_df.join(
+        topic_perc_docs,
+        on="Dominant_Topic"
+    )
     dominant_topic_distribution_df.reset_index(drop=True, inplace=True)
     dominant_topic_distribution_df.to_excel("dominant_topic_distribution.xlsx")
 
-    # Plot wordclouds for the first 9 topics by index.
-    cols = [color for name, color in mcolors.TABLEAU_COLORS.items()]
-    cloud = WordCloud(
-        stopwords=stop_words,
-        background_color='white',
-        width=2500,
-        height=1800,
-        max_words=10,
-        colormap='tab10',
-        color_func=lambda *args, **kwargs: cols[i],
-        prefer_horizontal=1.0
-    )
-    topics = ldamallet.show_topics(num_topics=9, formatted=False)
+    results_by_topic = results_by_topic_df(lda_model, corpus, topic_keyword_wt, save_as_excel=True)
 
     fig, axes = plt.subplots(3, 3, figsize=(3, 3), sharex=True, sharey=True)
 
