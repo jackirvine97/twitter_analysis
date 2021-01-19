@@ -31,7 +31,7 @@ def sent_to_words(sentences):
 
     Parameters
     ----------
-    sentences :obj:`list`
+    sentences : list
         List of sentences to be tokenised.
 
     """
@@ -45,8 +45,10 @@ def remove_stopwords(texts, stop_words):
 
     Parameters
     ----------
-    stop_words :obj:`list`
-        List of words to be removed.
+    texts : list
+        List of unprocessed raw text data.
+    stop_words  :list
+        List of words to be discarded.
 
     Returns
     -------
@@ -84,7 +86,7 @@ def make_trigrams(texts, trigram_mod):
 
 
 def lemmatization(texts, nlp, allowed_postags=['NOUN', 'ADJ', 'VERB', 'ADV']):
-    """Group together inflected forms of the same word so they can be analysed
+    """Groups together inflected forms of the same word so they can be analysed
     together.
 
     Parameters
@@ -112,20 +114,20 @@ def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=3):
 
     Parameters
     ----------
-    dictionary :obj:`dict`
+    dictionary : dict
         Gensim dictionary.
-    corpus :
-        Gensim corpus
-    texts :obj:`list`
-        List of input texts.
-    limit :obj:`int`
+    corpus : list
+        Model corpus
+    texts : list
+        List of lemmatised word ID - frequency pairs.
+    limit : int
         Max number of topics.
 
     Returns
     -------
-    :obj:`list`
+    list
         List of LDA topic models.
-    :obj:`list`
+    list
         Coherence values corresponding to the LDA model with respective
         number of topics.
 
@@ -156,14 +158,22 @@ def format_topics_sentences(ldamodel, corpus, texts):
 
     Parameters
     ----------
+    ldamodel : gensim.models.ldamodel.LdaModel or gensim.models.wrappers.ldamallet.LdaMallet
+        Gensim LDA model instantiated. Can be either a standard gensim model
+        or gensim wrapper for LDA Mallet model.
+    corpus : list
+        Model corpus.
+    texts : list
+        List of unprocessed raw text data.
 
     Returns
     -------
-    :obj:`pandas.DataFrame`
+    `pandas.DataFrame`
         Dataframe showing dominant topic, topic percentage contribution, topic
         keywords and the raw text for each document.
 
     """
+    # Init output
     sent_topics_df = pd.DataFrame()
 
     # Get main topic in each document
