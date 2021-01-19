@@ -729,21 +729,13 @@ def main(mallet=True, score=False):
 
     results_by_topic = results_by_topic_df(lda_model, corpus, topic_keyword_wt, save_as_excel=True)
 
-    fig, axes = plt.subplots(3, 3, figsize=(3, 3), sharex=True, sharey=True)
-
-    for i, ax in enumerate(axes.flatten()):
-        fig.add_subplot(ax)
-        topic_words = dict(topics[i][1])
-        cloud.generate_from_frequencies(topic_words, max_font_size=300)
-        plt.gca().imshow(cloud)
-        plt.gca().set_title('Topic ' + str(i), fontdict=dict(size=11))
-        plt.gca().axis('off')
-
-    plt.subplots_adjust(wspace=0, hspace=0)
-    plt.axis('off')
-    plt.margins(x=0, y=0)
-    plt.tight_layout()
-    plt.show()
+    # # Visualisation.
+    plot_document_count_per_topic(results_by_topic)
+    plot_word_count_and_weight_per_topic(data_lemmatized, topic_keyword_wt)
+    plot_word_count_per_doc_histogram(dominant_topic_df)
+    plot_t_sne_topic_clusters(lda_model, corpus, topic_keyword_wt)
+    plot_topic_wordclouds(topic_keyword_wt, 20, stop_words)
+    plot_in_pyldavis(lda_model, corpus, id2word)
 
     return
 
