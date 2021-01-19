@@ -689,10 +689,13 @@ def main(mallet=True, score=False):
     # for m, cv in zip(x, coherence_values):
     #     print("Num Topics =", m, " has Coherence Value of", round(cv, 4))
 
+    # Post-processing.
+
     # Find dominant topic for each document.
     df_topic_sents_keywords = format_topics_sentences(ldamodel=ldamallet, corpus=corpus, texts=data)
     dominant_topic_df = df_topic_sents_keywords.reset_index()
-    dominant_topic_df.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords', 'Text']
+    dominant_topic_df.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib',
+                                 'Keywords', 'Text']
 
     # Find most representative document for each topic.
     best_doc_per_topic_df = pd.DataFrame()
