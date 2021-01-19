@@ -1,4 +1,6 @@
-"""This script is WIP and may change significantly during development."""
+"""This script is WIP and may change significantly during development.
+Additional external packages are required to run this script. These
+will be documented when this script is in a more complete state."""
 from collections import Counter
 from pprint import pprint
 from random import shuffle
