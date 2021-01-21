@@ -607,7 +607,13 @@ def coherance_sensitivity_to_topic_num(id2word, corpus, data_lemmatized,
 
     return
 
-# Data preprocessing.
+
+"""
+************************
+Data preprocessing
+************************
+"""
+
 stop_words = stopwords.words('english')
 stop_words.extend(['from', 'subject', 're', 'edu', 'use', 'ax'])
 
@@ -644,17 +650,18 @@ id2word = corpora.Dictionary(data_lemmatized)
 texts = data_lemmatized
 corpus = [id2word.doc2bow(text) for text in texts]
 
-# Build LDA model.
+"""
+************************
+Build + Train Model
+************************
+"""
 
+mallet = True
 if mallet:
     """Mallet's method is based on Gibb's sampling, which is a more accurate
     fitting method than variational Bayes, used in standard GenSim modelling.
     Requires mallet source code download (http://mallet.cs.umass.edu/). This
-    is a Java package and so requires a JDK. Note this can only be used for
-    demos as the JDK requires a 'low-cost' commercial license (see
-    https://docs.oracle.com/en/java/javase/index.html).
-
-    """
+    is a Java package and so requires a JDK."""
     mallet_path = 'mallet-2.0.8/bin/mallet'
     ldamallet = gensim.models.wrappers.LdaMallet(
         mallet_path,
@@ -673,8 +680,6 @@ if mallet:
     lda_model = gensim.models.wrappers.ldamallet.malletmodel2ldamodel(ldamallet)
     topic_keyword_wt = ldamallet.show_topics(num_topics=-1, formatted=False)
     print('\nCoherence Score: ', coherence_ldamallet)
-    pprint(topic_keyword_wt)
-
 else:
     # Use the standard GenSim LDA model. This is currently not supported for
     # post processing or visualisation.
@@ -704,7 +709,11 @@ else:
         coherence_lda = coherence_model_lda.get_coherence()
         print('\nCoherence Score: ', coherence_lda)
 
-# Post-processing.
+"""
+************************
+Post Processing
+************************
+"""
 
 # Find dominant topic for each document.
 df_topic_sents_keywords = format_topics_sentences(ldamodel=ldamallet, corpus=corpus, texts=data)
@@ -744,7 +753,12 @@ dominant_topic_distribution_df.to_excel("dominant_topic_distribution.xlsx")
 
 results_by_topic = results_by_topic_df(lda_model, corpus, topic_keyword_wt, save_as_excel=True)
 
-# # Visualisation.
+"""
+************************
+Visualisation
+************************
+"""
+
 plot_document_count_per_topic(results_by_topic)
 plot_word_count_and_weight_per_topic(data_lemmatized, topic_keyword_wt)
 plot_word_count_per_doc_histogram(dominant_topic_df)
@@ -752,14 +766,10 @@ plot_t_sne_topic_clusters(lda_model, corpus, topic_keyword_wt)
 plot_topic_wordclouds(topic_keyword_wt, 20, stop_words)
 plot_in_pyldavis(lda_model, corpus, id2word)
 
-
-
 """
 TODO:
 - Make work for the gensim model
 - Visualise
-    - Plot bigram frequency.
-    - Plot trigram frequency.
 - Break into functions
 - Complete docstrings
 - Determine if new object is required or just a series of functions.
