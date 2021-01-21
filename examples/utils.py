@@ -1,5 +1,8 @@
 """Temporary collection of utility functions.
-TODO - determine better utility strategy to avoid import errors."""
+TODO:
+- determine better utility strategy to avoid import errors.
+- keywords should be extracted as constants.
+"""
 from datetime import date
 import json
 import os
@@ -122,3 +125,25 @@ def open_json(filename):
     with open(filename) as json_file:
         data_dict = json.load(json_file)
     return data_dict
+
+
+def open_json_as_dataframe(filename):
+    """Converts JSON data to padaframe.
+
+    Parameters
+    ----------
+    filename : str
+        Name of JSON file being loaded.
+
+    Returns
+    -------
+    pd.DataFrame
+        Pandas dataframe with information on tweets.
+    dict
+        Dictionary containing query metadata.
+
+    """
+    data_dict = open_json(filename)
+    metadata = data_dict["metadata"]
+    df = pd.DataFrame(data_dict["tweets"])
+    return df, metadata_dict
