@@ -568,6 +568,44 @@ def plot_topic_wordclouds(topic_keyword_wt, max_words, stop_words):
     return
 
 
+def coherance_sensitivity_to_topic_num(id2word, corpus, data_lemmatized,
+                                       lower_lim=1, upper_lim=25, step=2):
+    """Computes coherence across a range of values. This method only relates
+    to the standard gensim LDA model.
+
+    id2word : dict
+        Mapping of word id to word.
+    corpus : list
+        Model corpus.
+    data_lemmatized : Iterable
+        Iterable ID-frequency pairs for each document.
+    lower_lim : int
+        Lower limit of topic number search space (default is 1).
+    upper_lim : int
+        Lower limit of topic number search space (default is 1).
+    step : int
+        Search increment.
+
+    """
+    model_list, coherence_values = compute_coherence_values(
+        dictionary=id2word,
+        corpus=corpus,
+        texts=data_lemmatized,
+        start=lower_lim,
+        limit=upper_lim,
+        step=step
+    )
+    x = range(lower_lim, upper_lim, step)
+    plt.plot(x, coherence_values)
+    plt.xlabel("Num Topics")
+    plt.ylabel("Coherence score")
+    plt.legend(("coherence_values"), loc='best')
+    plt.show()
+
+    for m, cv in zip(x, coherence_values):
+        print("Num Topics =", m, " has Coherence Value of", round(cv, 4))
+
+
 def main(mallet=True, score=False):
     """Script wrapper to prevent multiprocessing runtime errors."""
 
@@ -668,28 +706,6 @@ def main(mallet=True, score=False):
             )
             coherence_lda = coherence_model_lda.get_coherence()
             print('\nCoherence Score: ', coherence_lda)
-
-    # # The following segment computes coherence across a range of values.
-    # limit = 15
-    # start = 13
-    # step = 1
-    # model_list, coherence_values = compute_coherence_values(
-    #     dictionary=id2word,
-    #     corpus=corpus,
-    #     texts=data_lemmatized,
-    #     start=start,
-    #     limit=limit,
-    #     step=step
-    # )
-    # x = range(start, limit, step)
-    # plt.plot(x, coherence_values)
-    # plt.xlabel("Num Topics")
-    # plt.ylabel("Coherence score")
-    # plt.legend(("coherence_values"), loc='best')
-    # plt.show()
-
-    # for m, cv in zip(x, coherence_values):
-    #     print("Num Topics =", m, " has Coherence Value of", round(cv, 4))
 
     # Post-processing.
 
