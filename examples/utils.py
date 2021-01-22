@@ -6,6 +6,7 @@ TODO:
 from datetime import date
 import json
 import os
+import pandas as pd
 import time
 import tweepy
 
@@ -144,6 +145,6 @@ def open_json_as_dataframe(filename):
 
     """
     data_dict = open_json(filename)
-    metadata = data_dict["metadata"]
+    metadata_dict = data_dict["metadata"]
     df = pd.DataFrame(data_dict["tweets"])
     return df, metadata_dict
