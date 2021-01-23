@@ -70,6 +70,9 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
         directory to target destination. JSON file extension (.json) will be
         appended automatically if not included in this argument.
 
+    Notes
+    -----
+    The `reply count` attribute is only available with premium accounts.
     """
 
     data_dict = {}
@@ -83,17 +86,22 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
     metadata["search_term"] = search_term
     data_dict["metadata"] = metadata
 
+    tweet_attrs = ["id_str", "text", "retweet_count", "favorite_count",
+                   "in_reply_to_status_id_str", "in_reply_to_screen_name",
+                   "in_reply_to_user_id", "source", "lang",  "geo",
+                   "coordinates", "place"]
+
     for tweet in tweet_list:
         single_tweet_dict = {}
-        single_tweet_dict['text'] = tweet.text
-        single_tweet_dict['created_at'] = tweet.created_at.strftime("%d-%b-%Y %H:%M:%S")
-        single_tweet_dict['id_str'] = tweet.id_str
-        single_tweet_dict['retweet_count'] = tweet.retweet_count
-        single_tweet_dict['favorite_count'] = tweet.favorite_count
-        single_tweet_dict['in_reply_to_screen_name'] = tweet.in_reply_to_screen_name
-        user_dictionery = tweet._json['user']
-        single_tweet_dict['followers_count'] = user_dictionery['followers_count']
-        single_tweet_dict['screen_name'] = user_dictionery['screen_name']
+        for attr in tweet_attrs:
+            single_tweet_dict[attr] = getattr(tweet, attr)
+        # Additional attrs accessed accessed through additional hierarchy.
+        single_tweet_dict["created_at"] = tweet.created_at.strftime("%d-%b-%Y %H:%M:%S")
+        single_tweet_dict["hashtags"] = [entity["text"] for entity in tweet.entities["hashtags"]]
+        user_dictionary = tweet._json["user"]
+        single_tweet_dict["user_followers_count"] = user_dictionary["followers_count"]
+        single_tweet_dict["user_screen_name"] = user_dictionary["screen_name"]
+        single_tweet_dict["user_user_location"] = user_dictionary["location"]
         tweets.append(single_tweet_dict)
     data_dict["tweets"] = tweets
 
@@ -103,7 +111,7 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
         ext = ".json"
     filename = f"{root}-{search_date_str}{ext}"
 
-    with open(filename, 'w') as json_file:
+    with open(filename, "w") as json_file:
         json.dump(data_dict, json_file)
 
     return
@@ -129,7 +137,7 @@ def open_json(filename):
 
 
 def open_json_as_dataframe(filename):
-    """Converts JSON data to padaframe.
+    """Converts JSON data to pandas dataframe.
 
     Parameters
     ----------
@@ -147,4 +155,5 @@ def open_json_as_dataframe(filename):
     data_dict = open_json(filename)
     metadata_dict = data_dict["metadata"]
     df = pd.DataFrame(data_dict["tweets"])
+    df.index.name = "tweet_id"
     return df, metadata_dict
