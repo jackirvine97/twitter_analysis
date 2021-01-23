@@ -94,7 +94,10 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
 
     for tweet in tweet_list:
         single_tweet_dict = {}
-        single_tweet_dict["text"] = f"RT @{tweet.retweeted_status.user._json['screen_name']}{tweet.retweeted_status.full_text}" if tweet.full_text.startswith("RT @") else tweet.full_text
+        try:
+            single_tweet_dict["text"] = f"RT @{tweet.retweeted_status.user._json['screen_name']}{tweet.retweeted_status.full_text}" if tweet.full_text.startswith("RT @") else tweet.full_text
+        except AttributeError:
+            single_tweet_dict["text"] = tweet.full_text
         for attr in tweet_attrs:
             single_tweet_dict[attr] = getattr(tweet, attr)
         # Additional attrs accessed accessed through additional hierarchy.
