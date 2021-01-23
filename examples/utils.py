@@ -90,7 +90,7 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
     tweet_attrs = ["id_str", "retweet_count", "favorite_count",
                    "in_reply_to_status_id_str", "in_reply_to_screen_name",
                    "in_reply_to_user_id", "source", "lang",  "geo",
-                   "coordinates", "place"]
+                   "coordinates"]
 
     for tweet in tweet_list:
         single_tweet_dict = {}
