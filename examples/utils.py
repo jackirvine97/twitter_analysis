@@ -35,7 +35,8 @@ def search_past_7_days(search_term, api, *, max_tweets=100, language="en"):
         api.search,
         q=search_term,
         language=language,
-        include_entities=True
+        include_entities=True,
+        tweet_mode="extended"
     ).items(max_tweets)
 
     # Gather the date, pausing 15 minutes any time the request limit is hit.
@@ -86,13 +87,14 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
     metadata["search_term"] = search_term
     data_dict["metadata"] = metadata
 
-    tweet_attrs = ["id_str", "text", "retweet_count", "favorite_count",
+    tweet_attrs = ["id_str", "retweet_count", "favorite_count",
                    "in_reply_to_status_id_str", "in_reply_to_screen_name",
                    "in_reply_to_user_id", "source", "lang",  "geo",
                    "coordinates", "place"]
 
     for tweet in tweet_list:
         single_tweet_dict = {}
+        single_tweet_dict["text"] = f"RT @{tweet.retweeted_status.user._json['screen_name']}{tweet.retweeted_status.full_text}" if tweet.full_text.startswith("RT @") else tweet.full_text
         for attr in tweet_attrs:
             single_tweet_dict[attr] = getattr(tweet, attr)
         # Additional attrs accessed accessed through additional hierarchy.
