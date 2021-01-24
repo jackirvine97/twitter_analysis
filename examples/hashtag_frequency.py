@@ -1,3 +1,4 @@
+"""Plots top n hashtags in dataset"""
 from collections import Counter
 
 import matplotlib.pyplot as plt
