@@ -87,8 +87,8 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
     metadata["search_term"] = search_term
     data_dict["metadata"] = metadata
 
-    tweet_attrs = ["id_str", "retweet_count", "favorite_count",
-                   "in_reply_to_status_id_str", "in_reply_to_screen_name",
+    tweet_attrs = ["id", "retweet_count", "favorite_count",
+                   "in_reply_to_status_id", "in_reply_to_screen_name",
                    "in_reply_to_user_id", "source", "lang",  "geo",
                    "coordinates"]
 
@@ -103,6 +103,7 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
         # Additional attrs accessed accessed through additional hierarchy.
         single_tweet_dict["created_at"] = tweet.created_at.strftime("%d-%b-%Y %H:%M:%S")
         single_tweet_dict["hashtags"] = [entity["text"] for entity in tweet.entities["hashtags"]]
+        single_tweet_dict["mentions"] = [entity["screen_name"] for entity in tweet.entities["user_mentions"]]
         user_dictionary = tweet._json["user"]
         single_tweet_dict["user_followers_count"] = user_dictionary["followers_count"]
         single_tweet_dict["user_screen_name"] = user_dictionary["screen_name"]
