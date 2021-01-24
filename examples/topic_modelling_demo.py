@@ -25,7 +25,7 @@ import seaborn as sns
 from sklearn.manifold import TSNE
 import spacy
 from wordcloud import WordCloud, STOPWORDS
-from utils import open_json_as_dataframe
+from utils import clean, de_emojify, open_json_as_dataframe
 
 
 def sent_to_words(sentences):
@@ -41,29 +41,6 @@ def sent_to_words(sentences):
     for sentence in sentences:
         # deacc=True removes punctuation.
         yield(gensim.utils.simple_preprocess(str(sentence), deacc=True))
-
-
-def de_emojify(text):
-    """Removes emojis from a string.
-
-    Parameters
-    ----------
-    text : str
-        String to remove emojis from.
-
-    Notes
-    -----
-    See https://stackoverflow.com/questions/33404752/
-        removing-emojis-from-a-string-in-python
-
-    """
-    regrex_pattern = re.compile(pattern="["
-        u"\U0001F600-\U0001F64F"  # emoticons
-        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-        u"\U0001F680-\U0001F6FF"  # transport & map symbols
-        u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-        "]+", flags=re.UNICODE)
-    return regrex_pattern.sub(r'', text)
 
 
 def remove_stopwords(texts, stop_words):
@@ -641,18 +618,21 @@ if __name__ == '__main__':
 
     """
 
-    df = pd.read_json('https://raw.githubusercontent.com/selva86/datasets/master/newsgroups.json')
+    # df = pd.read_json('https://raw.githubusercontent.com/selva86/datasets/master/newsgroups.json')
+
+    # Import standard df.
+    df_1, meta = open_json_as_dataframe("../data/ice_ban-23-Jan-2021.json")
+    df_2, meta = open_json_as_dataframe("../data/ev-24-Jan-2021.json")
+    df_3, meta = open_json_as_dataframe("../data/electric_car_uk-24-Jan-2021.json")
+    df_4, meta = open_json_as_dataframe("../data/electric_vehicle_uk-23-Jan-2021.json")
+    df = pd.concat([df_1, df_2, df_3, df_4]).reset_index()
 
     stop_words = stopwords.words('english')
-    stop_words.extend(['from', 'subject', 're', 'edu', 'use', 'ax'])
+    stop_words.extend(['from', 'subject', 're', 'edu', 'use', 'ax', 'rt'])
 
     # Convert to list and remove emails, new lines,  single quotation marks and urls.
-    data = df.content.values.tolist()
-    data = [re.sub('\S*@\S*\s?', '', sent) for sent in data]
-    data = [re.sub('\s+', ' ', sent) for sent in data]
-    data = [re.sub("\'", "", sent) for sent in data]
-    data = [re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", sent) for sent in data]
-    data = [de_emojify(sent) for sent in data]
+    data = df.text.values.tolist()
+    data = clean(data)
 
     data_words = list(sent_to_words(data))
 
