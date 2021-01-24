@@ -257,7 +257,6 @@ def plot_word_count_and_weight_per_topic(data_lemmatized, topic_keyword_wt):
         ax_twin.tick_params(axis='y', labelsize=3)
         ax_twin.bar(x='word', height="importance", data=df.loc[df.topic_id == i, :],
                     color=cols[i], width=0.2, label='Weights')
-        ax_twin.set_ylim(0, 0.125)
         ax.set_ylabel('Word Count', color=cols[i], fontsize=3)
         ax.set_title('Topic: ' + str(i), color=cols[i], fontsize=6)
         ax.tick_params(axis='y', left=False)
@@ -642,19 +641,13 @@ if __name__ == '__main__':
 
     """
 
+    df = pd.read_json('https://raw.githubusercontent.com/selva86/datasets/master/newsgroups.json')
+
     stop_words = stopwords.words('english')
     stop_words.extend(['from', 'subject', 're', 'edu', 'use', 'ax'])
 
-    df_1, y = open_json_as_dataframe("../data/ice_ban-23-Jan-2021.json")
-    df_2, y = open_json_as_dataframe("../data/electric_car_uk-24-Jan-2021.json")
-    df_3, y = open_json_as_dataframe("../data/electric_vehicle_uk-23-Jan-2021.json")
-    df_4, y = open_json_as_dataframe("../data/ev-24-Jan-2021.json")
-    df = pd.concat([df_1, df_2, df_3, df_4]).text
-
-    # df = pd.read_json('https://raw.githubusercontent.com/selva86/datasets/master/newsgroups.json')
-
     # Convert to list and remove emails, new lines,  single quotation marks and urls.
-    data = df.values.tolist()
+    data = df.content.values.tolist()
     data = [re.sub('\S*@\S*\s?', '', sent) for sent in data]
     data = [re.sub('\s+', ' ', sent) for sent in data]
     data = [re.sub("\'", "", sent) for sent in data]
@@ -692,71 +685,61 @@ if __name__ == '__main__':
     ************************
     """
 
-    topics = [5, 8, 11, 14, 17, 20, 23, 26]
-    coh = []
+    num_topics = 20
+    mallet = True
+    if mallet:
+        """Mallet's method is based on Gibb's sampling, which is a more accurate
+        fitting method than variational Bayes, used in standard GenSim modelling.
+        Requires mallet source code download (http://mallet.cs.umass.edu/). This
+        is a Java package and so requires a JDK."""
+        mallet_path = 'mallet-2.0.8/bin/mallet'
+        ldamallet = gensim.models.wrappers.LdaMallet(
+            mallet_path,
+            corpus=corpus,
+            num_topics=num_topics,
+            id2word=id2word
+        )
+        # Compute Coherence Score
+        coherence_model_ldamallet = CoherenceModel(
+            model=ldamallet,
+            texts=data_lemmatized,
+            dictionary=id2word,
+            coherence='c_v'
+        )
+        coherence_ldamallet = coherence_model_ldamallet.get_coherence()
+        lda_model = gensim.models.wrappers.ldamallet.malletmodel2ldamodel(ldamallet)
+        topic_keyword_wt = ldamallet.show_topics(num_topics=-1, formatted=False)
+        pprint(topic_keyword_wt)
+        print('\nCoherence Score: ', coherence_ldamallet)
+    else:
+        # Use the standard GenSim LDA model. This is currently not supported for
+        # post processing or visualisation.
+        lda_model = gensim.models.ldamodel.LdaModel(
+            corpus=corpus,
+            id2word=id2word,
+            num_topics=20,
+            random_state=100,
+            update_every=1,
+            chunksize=100,
+            passes=10,
+            alpha='auto',
+            per_word_topics=True
+        )
+        doc_lda = lda_model[corpus]
 
-    for topic_num in topics:
-
-        mallet = True
-        if mallet:
-            """Mallet's method is based on Gibb's sampling, which is a more accurate
-            fitting method than variational Bayes, used in standard GenSim modelling.
-            Requires mallet source code download (http://mallet.cs.umass.edu/). This
-            is a Java package and so requires a JDK."""
-            mallet_path = 'mallet-2.0.8/bin/mallet'
-            ldamallet = gensim.models.wrappers.LdaMallet(
-                mallet_path,
-                corpus=corpus,
-                num_topics=topic_num,
-                id2word=id2word
-            )
-            # Compute Coherence Score
-            coherence_model_ldamallet = CoherenceModel(
-                model=ldamallet,
+        if score:
+            # Compute perplexity - how 'surprised' the model is at new data.
+            # Compute topic coherence - measures how good the model is.
+            print('\nPerplexity: ', lda_model.log_perplexity(corpus))
+            coherence_model_lda = CoherenceModel(
+                model=lda_model,
                 texts=data_lemmatized,
                 dictionary=id2word,
                 coherence='c_v'
             )
-            coherence_ldamallet = coherence_model_ldamallet.get_coherence()
-            coh.append(coherence_ldamallet)
-            # lda_model = gensim.models.wrappers.ldamallet.malletmodel2ldamodel(ldamallet)
-            # topic_keyword_wt = ldamallet.show_topics(num_topics=-1, formatted=False)
-            print(topic_num)
-            print('\nCoherence Score: ', coherence_ldamallet)
-        else:
-            # Use the standard GenSim LDA model. This is currently not supported for
-            # post processing or visualisation.
-            lda_model = gensim.models.ldamodel.LdaModel(
-                corpus=corpus,
-                id2word=id2word,
-                num_topics=20,
-                random_state=100,
-                update_every=1,
-                chunksize=100,
-                passes=10,
-                alpha='auto',
-                per_word_topics=True
-            )
-            doc_lda = lda_model[corpus]
+            coherence_lda = coherence_model_lda.get_coherence()
+            print('\nCoherence Score: ', coherence_lda)
 
-            if score:
-                # Compute perplexity - how 'surprised' the model is at new data.
-                # Compute topic coherence - measures how good the model is.
-                print('\nPerplexity: ', lda_model.log_perplexity(corpus))
-                coherence_model_lda = CoherenceModel(
-                    model=lda_model,
-                    texts=data_lemmatized,
-                    dictionary=id2word,
-                    coherence='c_v'
-                )
-                coherence_lda = coherence_model_lda.get_coherence()
-                print('\nCoherence Score: ', coherence_lda)
-
-    for t, s in zip(topics, coh):
-        print(f"topic num {t}   score {s}")
-
-    plt.plot(topics, coh, 'o')
-    plt.show()
 
     """
     ************************
@@ -764,43 +747,43 @@ if __name__ == '__main__':
     ************************
     """
 
-    # # Find dominant topic for each document.
-    # df_topic_sents_keywords = format_topics_sentences(ldamodel=ldamallet, corpus=corpus, texts=data)
-    # dominant_topic_df = df_topic_sents_keywords.reset_index()
-    # dominant_topic_df.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib',
-    #                              'Keywords', 'Text']
+    # Find dominant topic for each document.
+    df_topic_sents_keywords = format_topics_sentences(ldamodel=ldamallet, corpus=corpus, texts=data)
+    dominant_topic_df = df_topic_sents_keywords.reset_index()
+    dominant_topic_df.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib',
+                                 'Keywords', 'Text']
 
-    # # Find most representative document for each topic.
-    # best_doc_per_topic_df = pd.DataFrame()
-    # sent_topics_outdf_grpd = df_topic_sents_keywords.groupby('Dominant_Topic')
-    # for i, grp in sent_topics_outdf_grpd:
-    #     best_doc_per_topic_df = pd.concat([best_doc_per_topic_df,
-    #                                       grp.sort_values(['Perc_Contribution'],
-    #                                        ascending=[0]).head(1)], axis=0)
-    # best_doc_per_topic_df.reset_index(drop=True, inplace=True)
-    # best_doc_per_topic_df.columns = ['Topic_Num', "Topic_Perc_Contrib", "Keywords", "Text"]
-    # best_doc_per_topic_df.to_excel("best_doc_per_topic.xlsx")
+    # Find most representative document for each topic.
+    best_doc_per_topic_df = pd.DataFrame()
+    sent_topics_outdf_grpd = df_topic_sents_keywords.groupby('Dominant_Topic')
+    for i, grp in sent_topics_outdf_grpd:
+        best_doc_per_topic_df = pd.concat([best_doc_per_topic_df,
+                                          grp.sort_values(['Perc_Contribution'],
+                                           ascending=[0]).head(1)], axis=0)
+    best_doc_per_topic_df.reset_index(drop=True, inplace=True)
+    best_doc_per_topic_df.columns = ['Topic_Num', "Topic_Perc_Contrib", "Keywords", "Text"]
+    best_doc_per_topic_df.to_excel("best_doc_per_topic.xlsx")
 
-    # # Tabulate the dominant topic distribution across documents. Note this is
-    # # different to the marginal topic distribution charted in pyLDAvis (which is
-    # # the % of words in the corpus a given topic covers).
-    # topic_num_keywords = df_topic_sents_keywords[["Dominant_Topic", "Topic_Keywords"]].drop_duplicates()
-    # topic_counts = df_topic_sents_keywords['Dominant_Topic'].value_counts()
-    # topic_counts.name = "Count"
-    # topic_perc_docs = round(topic_counts/topic_counts.sum(), 4)
-    # topic_perc_docs.name = "Percentage_Documents"
-    # temp_dominant_topic_distribution_df = topic_num_keywords.join(
-    #     topic_counts,
-    #     on="Dominant_Topic"
-    # )
-    # dominant_topic_distribution_df = temp_dominant_topic_distribution_df.join(
-    #     topic_perc_docs,
-    #     on="Dominant_Topic"
-    # )
-    # dominant_topic_distribution_df.reset_index(drop=True, inplace=True)
-    # dominant_topic_distribution_df.to_excel("dominant_topic_distribution.xlsx")
+    # Tabulate the dominant topic distribution across documents. Note this is
+    # different to the marginal topic distribution charted in pyLDAvis (which is
+    # the % of words in the corpus a given topic covers).
+    topic_num_keywords = df_topic_sents_keywords[["Dominant_Topic", "Topic_Keywords"]].drop_duplicates()
+    topic_counts = df_topic_sents_keywords['Dominant_Topic'].value_counts()
+    topic_counts.name = "Count"
+    topic_perc_docs = round(topic_counts/topic_counts.sum(), 4)
+    topic_perc_docs.name = "Percentage_Documents"
+    temp_dominant_topic_distribution_df = topic_num_keywords.join(
+        topic_counts,
+        on="Dominant_Topic"
+    )
+    dominant_topic_distribution_df = temp_dominant_topic_distribution_df.join(
+        topic_perc_docs,
+        on="Dominant_Topic"
+    )
+    dominant_topic_distribution_df.reset_index(drop=True, inplace=True)
+    dominant_topic_distribution_df.to_excel("dominant_topic_distribution.xlsx")
 
-    # results_by_topic = results_by_topic_df(lda_model, corpus, topic_keyword_wt, save_as_excel=True)
+    results_by_topic = results_by_topic_df(lda_model, corpus, topic_keyword_wt, save_as_excel=True)
 
     """
     ************************
@@ -808,12 +791,12 @@ if __name__ == '__main__':
     ************************
     """
 
-    # plot_document_count_per_topic(results_by_topic)
-    # plot_word_count_and_weight_per_topic(data_lemmatized, topic_keyword_wt)
-    # plot_word_count_per_doc_histogram(dominant_topic_df)
-    # plot_t_sne_topic_clusters(lda_model, corpus, topic_keyword_wt)
-    # plot_topic_wordclouds(topic_keyword_wt, 20, stop_words)
-    # plot_in_pyldavis(lda_model, corpus, id2word)
+    plot_document_count_per_topic(results_by_topic)
+    plot_word_count_and_weight_per_topic(data_lemmatized, topic_keyword_wt)
+    plot_word_count_per_doc_histogram(dominant_topic_df)
+    plot_t_sne_topic_clusters(lda_model, corpus, topic_keyword_wt)
+    plot_topic_wordclouds(topic_keyword_wt, 20, stop_words)
+    plot_in_pyldavis(lda_model, corpus, id2word)
 
 """
 TODO:
