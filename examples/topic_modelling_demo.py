@@ -42,6 +42,31 @@ def sent_to_words(sentences):
         yield(gensim.utils.simple_preprocess(str(sentence), deacc=True))
 
 
+def de_emojify(text):
+    """Removes emojis from a string.
+
+    Parameters
+    ----------
+    text : str
+        String to remove emojis from.
+
+    Notes
+    -----
+    See https://stackoverflow.com/questions/33404752/
+        removing-emojis-from-a-string-in-python
+
+    """
+    regrex_pattern = re.compile(pattern = "["
+        u"\U0001F600-\U0001F64F"  # emoticons
+        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+        u"\U0001F680-\U0001F6FF"  # transport & map symbols
+        u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                           "]+", flags = re.UNICODE)
+    return regrex_pattern.sub(r'',text)
+
+print(deEmojify("hh he"))
+
+raise NotImplementedError
 def remove_stopwords(texts, stop_words):
     """Removes stop words from list of words.
 
@@ -619,11 +644,13 @@ stop_words.extend(['from', 'subject', 're', 'edu', 'use', 'ax'])
 
 df = pd.read_json('https://raw.githubusercontent.com/selva86/datasets/master/newsgroups.json')
 
-# Convert to list and remove email addresses, new lines and single quotation marks.
+# Convert to list and remove emails, new lines,  single quotation marks and urls.
 data = df.content.values.tolist()
 data = [re.sub('\S*@\S*\s?', '', sent) for sent in data]
 data = [re.sub('\s+', ' ', sent) for sent in data]
 data = [re.sub("\'", "", sent) for sent in data]
+data = [re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", sent) for sent in data]
+data = [de_emojify for sent in data]
 
 data_words = list(sent_to_words(data))
 
