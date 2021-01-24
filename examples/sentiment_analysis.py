@@ -68,7 +68,7 @@ fig, ax = plt.subplots(figsize=(7, 7))
 ax.axis('equal')
 mypie, _, _ = ax.pie(outside_values, radius=1.3, labels=outside_names,
                      textprops={'color': "black", "size": 10, "alpha": 0.84},
-                     colors=[a(0.7), b(0.5), c(0.7)], autopct='%.1f%%',
+                     colors=[a(0.7), b(0.4), c(0.7)], autopct='%.1f%%',
                      pctdistance=0.89)
 plt.setp(mypie, width=0.3, edgecolor='white')
 
@@ -76,7 +76,7 @@ plt.setp(mypie, width=0.3, edgecolor='white')
 mypie2, _, _ = ax.pie(inside_values, radius=1.3-0.3, labels=inside_names,
                       textprops={'color': "black", "size": 10, "alpha": 0.84},
                       labeldistance=0.4, autopct="%.1f%%", pctdistance=0.8,
-                      colors=[a(0.6), a(0.4), b(0.3), c(0.6), c(0.4)])
+                      colors=[a(0.6), a(0.3), b(0.2), c(0.6), c(0.4)])
 plt.setp(mypie2, width=0.4, edgecolor='white')
 plt.margins(0, 0)
 # Central String
