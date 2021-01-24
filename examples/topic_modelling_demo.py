@@ -648,7 +648,7 @@ data = [re.sub('\S*@\S*\s?', '', sent) for sent in data]
 data = [re.sub('\s+', ' ', sent) for sent in data]
 data = [re.sub("\'", "", sent) for sent in data]
 data = [re.sub("([^0-9A-Za-z \t])|(\w+:\/\/\S+)", "", sent) for sent in data]
-data = [de_emojify for sent in data]
+data = [de_emojify(sent) for sent in data]
 
 data_words = list(sent_to_words(data))
 
