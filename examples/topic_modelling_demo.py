@@ -245,7 +245,8 @@ def plot_word_count_and_weight_per_topic(data_lemmatized, topic_keyword_wt):
 
     df = pd.DataFrame(out, columns=['word', 'topic_id', 'importance', 'word_count'])
     # Plot Word Count and Weights of Topic Keywords
-    fig, axes = plt.subplots(4, 5, figsize=(10, 7), sharey=True)
+    num_rows = math.ceil(len(topic_keyword_wt)/4)
+    fig, axes = plt.subplots(num_rows, 5, figsize=(10, 7), sharey=True)
     cols = [cm.tab20(x) for x in range(20)]
     shuffle(cols)
     for i, ax in enumerate(axes.flatten()):
