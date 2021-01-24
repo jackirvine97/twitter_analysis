@@ -64,9 +64,7 @@ def de_emojify(text):
                            "]+", flags = re.UNICODE)
     return regrex_pattern.sub(r'',text)
 
-print(deEmojify("hh he"))
 
-raise NotImplementedError
 def remove_stopwords(texts, stop_words):
     """Removes stop words from list of words.
 
