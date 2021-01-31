@@ -115,7 +115,7 @@ def create_tweet_data_dict_from_status_obj(status, tweet_attrs):
     for attr in tweet_attrs:
         single_tweet_dict[attr] = status._json[attr]
 
-    # Additional  accessed accessed through additional hierarchy.
+    # Additional key-values accessed accessed through additional hierarchy.
     single_tweet_dict["created_at"] = status._json["created_at"]
     single_tweet_dict["hashtags"] = [entity["text"] for entity in status._json["entities"]["hashtags"]]
     single_tweet_dict["mentions"] = [entity["screen_name"] for entity in status._json["entities"]["user_mentions"]]
