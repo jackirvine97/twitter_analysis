@@ -1,5 +1,5 @@
 # twitter_analysis
-Playground for interacting with the Twitter API.
+Playground for interacting with the Twitter API. Please note the branch `topic-modelling` is the WIP `main` branch.
 
 ## Context
 
