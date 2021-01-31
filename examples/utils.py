@@ -4,10 +4,12 @@ TODO:
 - keywords should be extracted as constants.
 """
 from datetime import date
-import json
 import os
-import pandas as pd
+import re
 import time
+
+import json
+import pandas as pd
 import tweepy
 
 
@@ -112,6 +114,65 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
     data_dict["tweets"] = tweets
 
     root, ext = os.path.splitext(filename)
+    if ext != ".json":
+        print(f"The extension {ext} is invalid. Replacing with '.json'")
+        ext = ".json"
+    filename = f"{root}-{search_date_str}{ext}"
+
+    with open(filename, "w") as json_file:
+        json.dump(data_dict, json_file)
+
+    return
+
+
+def save_from_user_timeline_search(tweet_list, *, filename, user_id):
+    data_dict = {}
+    metadata = {}
+    tweets = []
+
+    search_date_str = date.today().strftime("%d-%b-%Y")
+
+    metadata["date_collected"] = search_date_str
+    metadata["search_term"] = f"User timeline: @{user_id}"
+    data_dict["metadata"] = metadata
+
+    tweet_attrs = ["id", "retweet_count", "favorite_count",
+                   "in_reply_to_status_id", "in_reply_to_screen_name",
+                   "in_reply_to_user_id", "source", "lang",  "geo",
+                   "coordinates"]
+
+    num_tweets = 0
+    for status in tweet_list:
+        num_tweets += 1
+        single_tweet_dict = {}
+        try:
+            key = 'retweeted_status'
+            original_text = status._json["full_text"]
+            rt_text = status._json[key]["full_text"]
+            user_screen_name = status._json[key]['user']['screen_name']
+            single_tweet_dict["text"] = f"RT @{user_screen_name}{rt_text}" if original_text.startswith("RT @") else original_text
+            is_rt = True
+        except KeyError:
+            single_tweet_dict["text"] = status._json["full_text"]
+            is_rt = False
+
+        for attr in tweet_attrs:
+            single_tweet_dict[attr] = status._json[attr]
+        # Additional attrs accessed accessed through additional hierarchy.
+        single_tweet_dict["created_at"] = status._json["created_at"]
+        single_tweet_dict["hashtags"] = [entity["text"] for entity in status._json["entities"]["hashtags"]]
+        single_tweet_dict["mentions"] = [entity["screen_name"] for entity in status._json["entities"]["user_mentions"]]
+        user_dictionary = status._json["user"]
+        single_tweet_dict["user_followers_count"] = user_dictionary["followers_count"]
+        single_tweet_dict["user_screen_name"] = user_dictionary["screen_name"]
+        single_tweet_dict["user_user_location"] = user_dictionary["location"]
+        single_tweet_dict["search_method"] = "user_timeline"
+        single_tweet_dict["is_rt"] = is_rt
+        tweets.append(single_tweet_dict)
+    data_dict["tweets"] = tweets
+    data_dict["metadata"]["num_tweets"] = num_tweets
+
+    root, ext = os.path.splitext(f"../data/{filename}")
     if ext != ".json":
         print(f"The extension {ext} is invalid. Replacing with '.json'")
         ext = ".json"
