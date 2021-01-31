@@ -1,23 +1,16 @@
-# get tweepy 3.1 installed
-# find method
 # work out search term
-# get env name
 # check the search term on free first
 # get it working with cursor
-# entities and extended
-
-
-import tweepy
-from utils import (open_json_as_dataframe, save_tweets_as_json, search_past_7_days)
-
+# Ensure it works for full search
 from datetime import date
 import os
 import re
 import time
-
 import json
 import pandas as pd
+
 import tweepy
+from utils import open_json_as_dataframe
 
 
 API_KEY = "0G6R5aK2a9Bvlq3EUfVgOsaEF"
@@ -49,7 +42,7 @@ Extract Tweets
 """
 
 # Build Cursor.
-max_tweets = 30
+max_tweets = 110
 cursor = tweepy.Cursor(
     api.search_30_day,
     environment_name=environment_name,
@@ -144,5 +137,5 @@ filename = f"{root}-{search_date_str}{ext}"
 with open(filename, "w") as json_file:
     json.dump(data_dict, json_file)
 
-# df, meta = open_json_as_dataframe(f"{filename}")
-# df.to_excel("hellpopp.xlsx")
+df, meta = open_json_as_dataframe(f"{filename}")
+df.to_excel("hellpopp.xlsx")
