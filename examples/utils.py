@@ -111,9 +111,9 @@ def save_tweets_as_json(tweet_list, *, filename, search_term):
         single_tweet_dict["user_followers_count"] = user_dictionary["followers_count"]
         single_tweet_dict["user_screen_name"] = user_dictionary["screen_name"]
         single_tweet_dict["user_user_location"] = user_dictionary["location"]
-        single_tweet_dict["search_method"] = user_dictionary["search"]
-        tweets.append(single_tweet_dict)
+        single_tweet_dict["search_method"] = "search_function"
         single_tweet_dict["is_rt"] = True if hasattr(tweet, "retweeted_status") else False
+        tweets.append(single_tweet_dict)
     data_dict["tweets"] = tweets
 
     root, ext = os.path.splitext(filename)
