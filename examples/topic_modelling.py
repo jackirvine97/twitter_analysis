@@ -223,9 +223,8 @@ def plot_word_count_and_weight_per_topic(data_lemmatized, topic_keyword_wt):
     df = pd.DataFrame(out, columns=['word', 'topic_id', 'importance', 'word_count'])
     # Plot Word Count and Weights of Topic Keywords
     num_rows = math.ceil(len(topic_keyword_wt)/4)
-    fig, axes = plt.subplots(num_rows, 5, figsize=(10, 7), sharey=True)
-    cols = [cm.tab20(x) for x in range(20)]
-    shuffle(cols)
+    fig, axes = plt.subplots(num_rows, 4, figsize=(10, 7), sharey=True)
+    cols = [cm.tab10(x) for x in range(9)]
     for i, ax in enumerate(axes.flatten()):
         ax.bar(x='word', height="word_count", data=df.loc[df.topic_id == i, :],
                color=cols[i], width=0.5, alpha=0.3, label='Word Count')
@@ -234,13 +233,13 @@ def plot_word_count_and_weight_per_topic(data_lemmatized, topic_keyword_wt):
         ax_twin.tick_params(axis='y', labelsize=3)
         ax_twin.bar(x='word', height="importance", data=df.loc[df.topic_id == i, :],
                     color=cols[i], width=0.2, label='Weights')
-        ax.set_ylabel('Word Count', color=cols[i], fontsize=3)
+        ax.set_ylabel('Word Count', color=cols[i], fontsize=5)
         ax.set_title('Topic: ' + str(i), color=cols[i], fontsize=6)
         ax.tick_params(axis='y', left=False)
         ax.set_xticklabels(df.loc[df.topic_id == i, 'word'], rotation=30,
-                           horizontalalignment='right', fontsize=3)
+                           horizontalalignment='right', fontsize=5)
         ax.legend(loc='upper left', fontsize=3)
-        ax_twin.legend(loc='upper right', fontsize=3)
+        ax_twin.legend(loc='upper right', fontsize=5)
 
     fig.tight_layout(w_pad=2)
     fig.suptitle('Word Count and Importance of Topic Keywords', fontsize=8, y=1.05)
@@ -447,32 +446,32 @@ def plot_word_count_per_doc_histogram(dominant_topic_df):
     doc_lens = [len(d) for d in dominant_topic_df.Text]
 
     plt.figure()
-    plt.hist(doc_lens, bins=5000, color='navy')
-    plt.text(5750, 150, "Mean   : " + str(round(np.mean(doc_lens))))
-    plt.text(5750, 140, "Median : " + str(round(np.median(doc_lens))))
-    plt.text(5750, 130, "Stdev   : " + str(round(np.std(doc_lens))))
-    plt.text(5750, 120, "1%ile    : " + str(round(np.quantile(doc_lens, q=0.01))))
-    plt.text(5750, 110, "99%ile  : " + str(round(np.quantile(doc_lens, q=0.99))))
+    plt.hist(doc_lens, bins=30, color='yellowgreen')
+    plt.text(60, 800, "Mean   : " + str(round(np.mean(doc_lens))))
+    plt.text(60, 725, "Median : " + str(round(np.median(doc_lens))))
+    plt.text(60, 650, "Stdev   : " + str(round(np.std(doc_lens))))
+    plt.text(60, 575, "1%ile    : " + str(round(np.quantile(doc_lens, q=0.01))))
+    plt.text(60, 500, "99%ile  : " + str(round(np.quantile(doc_lens, q=0.99))))
 
-    plt.gca().set(xlim=(0, 8000), ylabel='Number of Documents', xlabel='Document Word Count')
+    plt.gca().set(xlim=(0, 280), ylabel='Number of Documents', xlabel='Document Word Count')
     plt.title('Distribution of Document Word Counts')
     plt.show()
 
     # Plot word count histogram per topic with kernel density estimate (KDE).
-    fig, axes = plt.subplots(4, 5, figsize=(8, 8), sharex=True, sharey=True)
+    fig, axes = plt.subplots(2, 4, figsize=(8, 8), sharex=True, sharey=True)
     for i, ax in enumerate(axes.flatten()):
         df_dominant_topic_sub = dominant_topic_df.loc[dominant_topic_df.Dominant_Topic == i, :]
         doc_lens = [len(d) for d in df_dominant_topic_sub.Text]
 
-        ax.hist(doc_lens, bins=5000)
+        ax.hist(doc_lens, bins=50)
         ax.tick_params(axis='both', labelsize=3)
-        ax.set_xlim(0, 4000)
+        ax.set_xlim(0, 280)
         ax.set_xlabel('Document Word Count', fontsize=3)
         ax.set_ylabel('Number of Documents', fontsize=3)
         ax.set_title('Topic: '+str(i), fontsize=6)
         ax_2 = sns.kdeplot(doc_lens, color="black", shade=False, ax=ax.twinx(), lw=0.6)
         ax_2.tick_params(axis='y', labelsize=3)
-        ax_2.set_ylim(0, 0.0008)
+        # ax_2.set_ylim(0, 0.0008)
         ax_2.set_ylabel('Density', fontsize=3)
         ax_2.set_yticklabels(["{:.2e}".format(t) for t in ax_2.get_yticks()])
 
@@ -536,9 +535,7 @@ def plot_t_sne_topic_clusters(lda_model, corpus, topic_keyword_wt):
 
 def plot_topic_wordclouds(topic_keyword_wt, max_words, stop_words):
     """Plots wordclouds for most prevalent words in each topic distribution."""
-
-    colours_list = [color for name, color in mcolors.CSS4_COLORS.items()]
-    shuffle(colours_list)
+    cols = [color for name, color in mcolors.TABLEAU_COLORS.items()]
     cloud = WordCloud(
         stopwords=stop_words,
         background_color='white',
@@ -546,7 +543,7 @@ def plot_topic_wordclouds(topic_keyword_wt, max_words, stop_words):
         height=1800,
         max_words=max_words,
         colormap='tab10',
-        color_func=lambda *args, **kwargs: colours_list[i],
+        color_func=lambda *args, **kwargs: cols[i],
         prefer_horizontal=1.0
     )
     num_rows = math.ceil(len(topic_keyword_wt)/4)
@@ -617,7 +614,7 @@ if __name__ == '__main__':
     ************************
 
     """
-
+    cols = [cm.tab10(x) for x in range(9)]
     # df = pd.read_json('https://raw.githubusercontent.com/selva86/datasets/master/newsgroups.json')
 
     # Import standard df.
@@ -665,7 +662,7 @@ if __name__ == '__main__':
     ************************
     """
 
-    num_topics = 20
+    num_topics = 8
     mallet = True
     if mallet:
         """Mallet's method is based on Gibb's sampling, which is a more accurate
@@ -733,6 +730,11 @@ if __name__ == '__main__':
     dominant_topic_df.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib',
                                  'Keywords', 'Text']
 
+    # Temporary - append dominant topic to df.
+    df["dominant_topic"] = dominant_topic_df.Dominant_Topic
+    df["dominant_topic_keywords"] = dominant_topic_df.Keywords
+    df.to_excel("topic_model_outputs/electric_vehicle_concat_24-Jan_3.xlsx")
+
     # Find most representative document for each topic.
     best_doc_per_topic_df = pd.DataFrame()
     sent_topics_outdf_grpd = df_topic_sents_keywords.groupby('Dominant_Topic')
@@ -742,7 +744,7 @@ if __name__ == '__main__':
                                            ascending=[0]).head(1)], axis=0)
     best_doc_per_topic_df.reset_index(drop=True, inplace=True)
     best_doc_per_topic_df.columns = ['Topic_Num', "Topic_Perc_Contrib", "Keywords", "Text"]
-    best_doc_per_topic_df.to_excel("best_doc_per_topic.xlsx")
+    best_doc_per_topic_df.to_excel("topic_model_outputs/best_doc_per_topic.xlsx")
 
     # Tabulate the dominant topic distribution across documents. Note this is
     # different to the marginal topic distribution charted in pyLDAvis (which is
@@ -761,7 +763,7 @@ if __name__ == '__main__':
         on="Dominant_Topic"
     )
     dominant_topic_distribution_df.reset_index(drop=True, inplace=True)
-    dominant_topic_distribution_df.to_excel("dominant_topic_distribution.xlsx")
+    dominant_topic_distribution_df.to_excel("topic_model_outputs/dominant_topic_distribution.xlsx")
 
     results_by_topic = results_by_topic_df(lda_model, corpus, topic_keyword_wt, save_as_excel=True)
 
@@ -774,7 +776,7 @@ if __name__ == '__main__':
     plot_document_count_per_topic(results_by_topic)
     plot_word_count_and_weight_per_topic(data_lemmatized, topic_keyword_wt)
     plot_word_count_per_doc_histogram(dominant_topic_df)
-    plot_t_sne_topic_clusters(lda_model, corpus, topic_keyword_wt)
+    # plot_t_sne_topic_clusters(lda_model, corpus, topic_keyword_wt)
     plot_topic_wordclouds(topic_keyword_wt, 20, stop_words)
     plot_in_pyldavis(lda_model, corpus, id2word)
 
