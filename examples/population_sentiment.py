@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-# Option 2), read pickle in processed data (preferred).
 df = pd.read_pickle("../processed_data/ICE_ban_November_2020_sent.pkl")
 
 favourites = df.favorite_count.to_list()
