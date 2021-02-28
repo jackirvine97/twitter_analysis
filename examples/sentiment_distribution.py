@@ -4,7 +4,6 @@ import seaborn as sns
 
 df = pd.read_excel("topic_model_outputs/electric_vehicle_concat_24-Jan_3.xlsx")
 
-
 # plt.figure(figsize=(10, 6))
 # sns.boxenplot(x='dominant_topic', y='polarity', data=df, k_depth="proportion")
 # plt.show()
