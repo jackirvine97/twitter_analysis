@@ -5,12 +5,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from utils import open_json_as_dataframe
 
-# Import standard df.
-df_1, meta = open_json_as_dataframe("../data/ice_ban-23-Jan-2021.json")
-df_2, meta = open_json_as_dataframe("../data/ev-24-Jan-2021.json")
-df_3, meta = open_json_as_dataframe("../data/electric_car_uk-24-Jan-2021.json")
-df_4, meta = open_json_as_dataframe("../data/electric_vehicle_uk-23-Jan-2021.json")
-df = pd.concat([df_1, df_2, df_3, df_4])
+dfs_1 = [open_json_as_dataframe(f"../data/ICE_ban_November_2020_{index}-31-Jan-2021.json")[0] for index in range(1, 5)]
+dfs_2 = [open_json_as_dataframe(f"../data/ICE_ban_November_2020_{index}-01-Feb-2021.json")[0] for index in range(5, 10)]
+df = pd.concat(dfs_1 + dfs_2)
 
 # Extract most frequency hashtags
 num_hts = 17
