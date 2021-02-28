@@ -2,24 +2,20 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from PIL import Image
 import re
 import time
 import tweepy
-from utils import search_past_7_days
+from utils import (open_json_as_dataframe, search_past_7_days)
 from wordcloud import STOPWORDS, WordCloud
 
-# Authenticate to Twitter and instantiate API.
-auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
-auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-api = tweepy.API(auth)
 
-search_term = ["covid 19"]
-number_of_tweets = 500
+dfs_1 = [open_json_as_dataframe(f"../data/ICE_ban_November_2020_{index}-31-Jan-2021.json")[0] for index in range(1, 5)]
+dfs_2 = [open_json_as_dataframe(f"../data/ICE_ban_November_2020_{index}-01-Feb-2021.json")[0] for index in range(5, 10)]
+df = pd.concat(dfs_1 + dfs_2)
 
-# Collect tweets.
-tweets = search_past_7_days(search_term, api, max_tweets=number_of_tweets)
-tweets_text = [tweet.text for tweet in tweets]
+tweets_text = df.text.to_list()
 tweet_count = len(tweets_text)
 
 # Combine and filter.
