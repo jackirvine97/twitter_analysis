@@ -1,22 +1,19 @@
 """Pulls recent tweets from a specified account."""
 from datetime import date
 import os
+import time
 
 import json
 import tweepy
 from utils import open_json_as_dataframe, search_past_7_days, save_tweets_as_json
 
-API_KEY = "0G6R5aK2a9Bvlq3EUfVgOsaEF"
-API_KEY_SECRET = "QThazI5cEW2vj1p6yTbHguvyTIeaFQNVL8XEI6rxWDuTnnIaOp"
-ACCESS_TOKEN = "1848494462-2bCP5LiDE8Lc8dKR09pxeqRJ0rIPO7seHWx5Ekk"
-ACCESS_TOKEN_SECRET = "Q8omGl9o6s2qNYcqC5OLMf5IEBSXi5uAtV35i4iJvScwp"
 
 # Authenticate to Twitter and instantiate API.
 auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
-filename = "test_filename"
+filename = "TEST123456"
 userID = "@jack"
 
 max_tweets = 20
@@ -43,7 +40,7 @@ while True:
     except StopIteration:
         # Entered when `max_tweets` reached.
         break
+for i in tweet_data:
+    print(type(i))
 
 save_tweets_as_json(tweet_data, filename=f"../data/{filename}.json", search_term=userID, search_method="user_timeline")
-df, v = open_json_as_dataframe(f"../data/{filename}-31-Jan-2021.json")
-df.to_excel(f"{filename}.xlsx")
