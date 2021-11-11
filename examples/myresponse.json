@@ -1,0 +1,1 @@
+{"results":[{"timePeriod":"202001010000","count":7},{"timePeriod":"202001020000","count":5},{"timePeriod":"202001030000","count":5},{"timePeriod":"202001040000","count":16}],"totalCount":33,"requestParameters":{"bucket":"day","fromDate":"202001010000","toDate":"202001050000"}}

@@ -11,25 +11,10 @@ import json
 import pandas as pd
 
 import tweepy
+
 from utils import open_json_as_dataframe
+from config import (API_KEY, API_KEY_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
-# Jack Demo 1
-API_KEY = "0G6R5aK2a9Bvlq3EUfVgOsaEF"
-API_KEY_SECRET = "QThazI5cEW2vj1p6yTbHguvyTIeaFQNVL8XEI6rxWDuTnnIaOp"
-ACCESS_TOKEN = "1848494462-2bCP5LiDE8Lc8dKR09pxeqRJ0rIPO7seHWx5Ekk"
-ACCESS_TOKEN_SECRET = "Q8omGl9o6s2qNYcqC5OLMf5IEBSXi5uAtV35i4iJvScwp"
-
-# Jack Demo 2
-API_KEY = "y3Xmf0jTaSDF7dY8BCVatN8uG"
-API_KEY_SECRET = "mWAkcHkR2ijlTYK0nWIoMN4O3k9J3xebTIUqmHEAs0fx19Sslu"
-ACCESS_TOKEN = "1848494462-O4oZeiuANc4uJFXIUKMZqkETHTWpG81N8qfFYFw"
-ACCESS_TOKEN_SECRET = "3VHkj5nbIxzcCbFFCeig3kmwd9wJQafM4m3OVPMFw873v"
-
-# Jack Demo 3
-API_KEY = "LNZNc1EmwCINMJU7QXLV2Lhwr"
-API_KEY_SECRET = "fB4cX5sbj61GAQDrZvrl0NPyCBVhqorL20dgr1s2HY1s4HhH6m"
-ACCESS_TOKEN = "1355978214007517185-1tbs8c6QeMZ9CRYtam45onmBpezsE0"
-ACCESS_TOKEN_SECRET = "oZJnMlhlXMyngmI6zL0TT26wbQDSrAsxFDUQjQjhB9128"
 
 # Authenticate to Twitter and instantiate API.
 auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
@@ -46,17 +31,26 @@ print("Dates correct?")
 input()
 print("How many tweets?")
 input()
+print("Max results 100 or 500")
+input()
 """
 **********************
 Query Terms
 **********************
 """
 
-filename = "ICE_ban_November_2020_9"
-search_term = "uk (ev OR petrol ban OR diesel ban OR 2030 OR ice ban)"
-environment_name = "JackDemo3"
-toDate = "202011210012"  # Most recent date.
-fromDate = "202011200000"  # Oldest date.
+# Copy paste dates in
+# Check dates and compress
+# Check name
+# Excel name
+
+toDate   = "202003122100"  # Most recent date.
+fromDate = "202003010000"  # Oldest date.
+filename = "EV-Mar-12_2020_4500"
+search_term = "(electric vehicle OR electric car)"
+environment_name = "JackDemoOrig"
+
+excel = "EV-Mar-12_2020_4500.xlsx"
 
 
 """
@@ -66,13 +60,14 @@ Extract Tweets
 """
 
 # Build Cursor.
-max_tweets = 300
+max_tweets = 4500
 cursor = tweepy.Cursor(
     api.search_full_archive,
     environment_name=environment_name,
     query=search_term,
     toDate=toDate,
-    fromDate=fromDate
+    fromDate=fromDate,
+    maxResults=100
 ).items(max_tweets)
 
 
@@ -164,4 +159,4 @@ with open(filename, "w") as json_file:
     json.dump(data_dict, json_file)
 
 df, meta = open_json_as_dataframe(f"{filename}")
-df.to_excel("REALTHING8.xlsx")
+df.to_excel(excel)

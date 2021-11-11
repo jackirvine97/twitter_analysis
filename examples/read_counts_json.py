@@ -8,6 +8,7 @@ from utils import open_json
 
 
 day_list = open_json("Counts_Nov20_Mar_21.json")["results"]
+day_list += open_json("Counts_Mar-21.json")["results"]
 for index in range(2, 5):
     day_list += open_json(f"Counts_Nov20_Mar_21_{index}.json")["results"]
 for index in range(1, 12):
@@ -21,10 +22,12 @@ df["Count"] = tweet_count
 df.columns = ["date", "count"]
 df = df.sort_values("date").reset_index(drop=True)
 
-plt.plot(df["date"], df["count"], label="Actual", color="deepskyblue")
+print(df["date"])
+s
+plt.plot(df["date"], df["count"], label="Daily Count", color="deepskyblue")
 df = df.set_index("date")
 plt.plot(df.rolling(14).mean().index, df.rolling(14).mean(), label="14 Day Rolling Average", linestyle="dashed", color="slategrey", linewidth=2)
 plt.xlabel("Date")
-plt.ylabel("Number of Tweets")
+plt.ylabel("Daily Number of Tweets")
 plt.legend(loc=4)
 plt.show()

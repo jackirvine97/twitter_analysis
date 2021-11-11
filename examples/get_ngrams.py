@@ -25,25 +25,38 @@ def get_top_x_ngrams(corpus, x=None, *, ngram_range=(3, 3)):
     return words_freq[:x]
 
 
-dfs_1 = [open_json_as_dataframe(f"../data/ICE_ban_November_2020_{index}-31-Jan-2021.json")[0] for index in range(1, 5)]
-dfs_2 = [open_json_as_dataframe(f"../data/ICE_ban_November_2020_{index}-01-Feb-2021.json")[0] for index in range(5, 10)]
-df = pd.concat(dfs_1 + dfs_2)
+# df = pd.read_pickle("../processed_data/EVs_2020_Tweets_sent_topics.pkl")
+# df = df.loc[df["rt"]==False]  # Filter out RTs
+# df = df[~df['text'].str.contains('hr6201')]
+# df = df[~df['text'].str.contains('HR6201')]
+# df = df[~df['text'].str.contains('JohnKingCNN')]
+# df = df[~df['text'].str.contains('Started a space company &gt')]
+# df = df[~df['text'].str.contains('CraigCaplan')]
+# df = df[~df['text'].str.contains('Shane_Evs')]
+# df = df[~df['text'].str.contains('Evs_Dubai')]
 
-df = df.loc[df["rt"] is False]  # Filter out RTs
+df = pd.read_pickle(f"../processed_data/EVs_2020_Tweets_sent_2.pkl")
+df = df.loc[df["rt"]==False]  # Filter out RTs
+df = df[~df['text'].str.contains('@fkabudu')]
+df = df[~df['text'].str.contains('jaguar')]
 
 tweets_list = df.text.to_list()
 tweets_list = clean(tweets_list)
-common_words = get_top_x_ngrams(tweets_list, 50)
+common_words = get_top_x_ngrams(tweets_list, 30, ngram_range=(3, 3))
 trigrams = pd.DataFrame(common_words, columns=['trigram', 'count'])
 
 # Plot most frequent trigrams.
 plt.figure()
 plt.barh(trigrams.trigram, trigrams["count"])
-plt.xlabel("Top Trigram")
-plt.ylabel("Number of Tweets")
+plt.ylabel("Top Trigram")
+plt.xlabel("Number of Tweets")
 plt.tight_layout()
 plt.gca().invert_yaxis()
 plt.show()
+
+
+
+
 
 """
 Create trigram network plot.

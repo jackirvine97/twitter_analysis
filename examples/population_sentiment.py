@@ -2,9 +2,16 @@
 detailing polarity and subjectivity."""
 import matplotlib.pyplot as plt
 import pandas as pd
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
+analyser = SentimentIntensityAnalyzer()
+x = analyser.polarity_scores("love")["compound"]
+print(x)
 
-df = pd.read_pickle("../processed_data/ICE_ban_November_2020_sent.pkl")
+k
+df = pd.read_pickle("../processed_data/ICE_Ban_November_2020_sent.pkl")
+
+print(df.polarity.mean())
 
 favourites = df.favorite_count.to_list()
 retweets = df.retweet_count.to_list()

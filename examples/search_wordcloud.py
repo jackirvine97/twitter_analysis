@@ -14,6 +14,8 @@ from wordcloud import STOPWORDS, WordCloud
 dfs_1 = [open_json_as_dataframe(f"../data/ICE_ban_November_2020_{index}-31-Jan-2021.json")[0] for index in range(1, 5)]
 dfs_2 = [open_json_as_dataframe(f"../data/ICE_ban_November_2020_{index}-01-Feb-2021.json")[0] for index in range(5, 10)]
 df = pd.concat(dfs_1 + dfs_2)
+df, meta = open_json_as_dataframe("../data/EVs_15th_January_2020-28-Feb-2021.json")
+df = pd.read_pickle("../processed_data/EVs_2020_Tweets_sent_topics.pkl")
 
 tweets_text = df.text.to_list()
 tweet_count = len(tweets_text)

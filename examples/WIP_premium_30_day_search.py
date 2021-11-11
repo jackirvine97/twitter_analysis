@@ -9,13 +9,9 @@ import json
 import pandas as pd
 
 import tweepy
+
+from config import (API_KEY, API_KEY_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 from utils import open_json_as_dataframe
-
-
-API_KEY = "0G6R5aK2a9Bvlq3EUfVgOsaEF"
-API_KEY_SECRET = "QThazI5cEW2vj1p6yTbHguvyTIeaFQNVL8XEI6rxWDuTnnIaOp"
-ACCESS_TOKEN = "1848494462-2bCP5LiDE8Lc8dKR09pxeqRJ0rIPO7seHWx5Ekk"
-ACCESS_TOKEN_SECRET = "Q8omGl9o6s2qNYcqC5OLMf5IEBSXi5uAtV35i4iJvScwp"
 
 # Authenticate to Twitter and instantiate API.
 auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
@@ -28,10 +24,11 @@ Query Terms
 **********************
 """
 
-filename = "cliamte_change_mid_jan"
-search_term = "climate change"
-environment_name = "Test30Day"
-toDate = "202101150000"
+toDate = "202102282100"  # Most recent date.
+filename = "EVs_28th_Feb_2021"
+
+search_term = "(electric vehicle OR electric car OR EVs)"
+environment_name = "JackDemo30Days"
 
 
 """
@@ -41,7 +38,7 @@ Extract Tweets
 """
 
 # Build Cursor.
-max_tweets = 1000
+max_tweets = 9000
 cursor = tweepy.Cursor(
     api.search_30_day,
     environment_name=environment_name,

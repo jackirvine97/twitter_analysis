@@ -618,14 +618,10 @@ if __name__ == '__main__':
     # df = pd.read_json('https://raw.githubusercontent.com/selva86/datasets/master/newsgroups.json')
 
     # Import standard df.
-    df_1, meta = open_json_as_dataframe("../data/ice_ban-23-Jan-2021.json")
-    df_2, meta = open_json_as_dataframe("../data/ev-24-Jan-2021.json")
-    df_3, meta = open_json_as_dataframe("../data/electric_car_uk-24-Jan-2021.json")
-    df_4, meta = open_json_as_dataframe("../data/electric_vehicle_uk-23-Jan-2021.json")
-    df = pd.concat([df_1, df_2, df_3, df_4]).reset_index()
+    df = pd.read_pickle("../processed_data/ICE_Ban_November_2020_sent.pkl")
 
     stop_words = stopwords.words('english')
-    stop_words.extend(['from', 'subject', 're', 'edu', 'use', 'ax', 'rt'])
+    stop_words.extend(['from', 'subject', 're', 'edu', 'use', 'ax', 'rt', "ev", "electric", "vehicle", "car"])
 
     # Convert to list and remove emails, new lines,  single quotation marks and urls.
     data = df.text.values.tolist()
@@ -662,7 +658,7 @@ if __name__ == '__main__':
     ************************
     """
 
-    num_topics = 8
+    num_topics = 7
     mallet = True
     if mallet:
         """Mallet's method is based on Gibb's sampling, which is a more accurate
@@ -674,7 +670,8 @@ if __name__ == '__main__':
             mallet_path,
             corpus=corpus,
             num_topics=num_topics,
-            id2word=id2word
+            id2word=id2word,
+            alpha=50
         )
         # Compute Coherence Score
         coherence_model_ldamallet = CoherenceModel(
@@ -733,7 +730,9 @@ if __name__ == '__main__':
     # Temporary - append dominant topic to df.
     df["dominant_topic"] = dominant_topic_df.Dominant_Topic
     df["dominant_topic_keywords"] = dominant_topic_df.Keywords
-    df.to_excel("topic_model_outputs/electric_vehicle_concat_24-Jan_3.xlsx")
+    # df.to_excel("test.xlsx") 
+    dominant_topic_df.to_excel("testdf.xlsx")
+    df.to_pickle("../processed_data/ICE_Ban_November_2020_sent_topics_15.pkl")
 
     # Find most representative document for each topic.
     best_doc_per_topic_df = pd.DataFrame()
@@ -744,7 +743,7 @@ if __name__ == '__main__':
                                            ascending=[0]).head(1)], axis=0)
     best_doc_per_topic_df.reset_index(drop=True, inplace=True)
     best_doc_per_topic_df.columns = ['Topic_Num', "Topic_Perc_Contrib", "Keywords", "Text"]
-    best_doc_per_topic_df.to_excel("topic_model_outputs/best_doc_per_topic.xlsx")
+    # best_doc_per_topic_df.to_excel("topic_model_outputs/best_doc_per_topic.xlsx")
 
     # Tabulate the dominant topic distribution across documents. Note this is
     # different to the marginal topic distribution charted in pyLDAvis (which is
@@ -765,7 +764,7 @@ if __name__ == '__main__':
     dominant_topic_distribution_df.reset_index(drop=True, inplace=True)
     dominant_topic_distribution_df.to_excel("topic_model_outputs/dominant_topic_distribution.xlsx")
 
-    results_by_topic = results_by_topic_df(lda_model, corpus, topic_keyword_wt, save_as_excel=True)
+    results_by_topic = results_by_topic_df(lda_model, corpus, topic_keyword_wt, save_as_excel=False)
 
     """
     ************************
@@ -773,11 +772,11 @@ if __name__ == '__main__':
     ************************
     """
 
-    plot_document_count_per_topic(results_by_topic)
-    plot_word_count_and_weight_per_topic(data_lemmatized, topic_keyword_wt)
-    plot_word_count_per_doc_histogram(dominant_topic_df)
-    # plot_t_sne_topic_clusters(lda_model, corpus, topic_keyword_wt)
-    plot_topic_wordclouds(topic_keyword_wt, 20, stop_words)
+    # plot_document_count_per_topic(results_by_topic)
+    # plot_word_count_and_weight_per_topic(data_lemmatized, topic_keyword_wt)
+    # plot_word_count_per_doc_histogram(dominant_topic_df)
+    # # plot_t_sne_topic_clusters(lda_model, corpus, topic_keyword_wt)
+    # plot_topic_wordclouds(topic_keyword_wt, 20, stop_words)
     plot_in_pyldavis(lda_model, corpus, id2word)
 
 """

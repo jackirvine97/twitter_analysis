@@ -1,21 +1,54 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import numpy as np
 
-df = pd.read_excel("topic_model_outputs/electric_vehicle_concat_24-Jan_3.xlsx")
+from textblob import TextBlob
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-# plt.figure(figsize=(10, 6))
-# sns.boxenplot(x='dominant_topic', y='polarity', data=df, k_depth="proportion")
-# plt.show()
+from utils import clean, open_json_as_dataframe
+
+df = pd.read_pickle("../processed_data/ICE_Ban_November_2020_sent_topics_15 3.pkl")
+
+analyser = SentimentIntensityAnalyzer()
+
+pol = [analyser.polarity_scores(tweet)["compound"] for tweet in df.text]
+df["vd_polarity"] = pol
+
+df = df.loc[df["lang"] == "en"]  # Filter out languages.
+df = df.loc[df["rt"] == False]  # Filter out languages.
 fig, ax = plt.subplots(figsize=(9, 6))
 
-sns.violinplot(x=df['inferred_topic'], y=df['polarity'], scale="count", inner="quartile", linewidthfloat=0.1, cut=0)
-ax.set_title('Topic Sentiment Distribution', fontsize=15, loc='center')
-ax.set_xlabel('Topics', fontsize=13)
-ax.set_ylabel('Polarity', fontsize=13)
+conditions = [
+    (df['dominant_topic'] == 0),
+    (df['dominant_topic'] == 1),
+    (df['dominant_topic'] == 2),
+    (df['dominant_topic'] == 3),
+    (df['dominant_topic'] == 4),
+    (df['dominant_topic'] == 5),
+    (df['dominant_topic'] == 6),
+    (df['dominant_topic'] == 7),
+    (df['dominant_topic'] == 8),
+    (df['dominant_topic'] == 9),
+    (df['dominant_topic'] == 10),
+    (df['dominant_topic'] == 11),
+    (df['dominant_topic'] == 12),
+    (df['dominant_topic'] == 13),
+    (df['dominant_topic'] == 14)
+]
 
-plt.tick_params(axis='y', which='major', labelsize=12)
-plt.tick_params(axis='x', which='major', labelsize=12)
+choices = ['ICE Ban', 'ICE Ban', 'ICE Ban', "10pt Plan", "Van", "ICE Ban", "Petrol Sales", "Wind Power", "ICE Ban", "Green Tech", "PC Impact", "ICE Ban", "ICE Ban", "Wind Power", "10pt Plan"]
+choices = ['ICE Ban', 'P Sales', 'Tech', 'ICE Ban', 'ICE Ban', 'Wind','ICE Ban', 'EVs', 'ICE Ban', 'ICE Ban', 'pc impact', 'ICE Ban', 'ICE Ban', 'Net Zero', '10pt Plan']
+df['topic'] = np.select(conditions, choices, default='black')
+
+
+sns.violinplot(x=df['topic'], y=df['polarity'], scale="count", bw="scott", linewidth=1, width=1.05)
+ax.set_title('Topic Sentiment Distribution', fontsize=11, loc='center')
+ax.set_xlabel('Topics', fontsize=11)
+ax.set_ylabel('Sentiment Score', fontsize=11)
+
+plt.tick_params(axis='y', which='major', labelsize=11)
+plt.tick_params(axis='x', which='major', labelsize=11, rotation=90)
 ax.yaxis.tick_left()  # where the y axis marks will be
 plt.tight_layout()
 plt.show()
